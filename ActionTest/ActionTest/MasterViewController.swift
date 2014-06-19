@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MasterViewController: UITableViewController {
+class MasterViewController: UITableViewController, PTATableViewCellDelegate, PTATableViewCellDelegateOptional {
 	
 	var objects = ["Swipe Me Left or Right", "Swipe Me Left to Delete"]
 	
@@ -36,6 +36,12 @@ class MasterViewController: UITableViewController {
 		self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
 	}
 	
+	func viewWithImage(#named: String) -> UIView {
+		var imageView = UIImageView(image: UIImage(named: named))
+		imageView.contentMode = .Center
+		return imageView
+	}
+	
 	// #pragma mark - Table View
 	
 	override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -49,23 +55,26 @@ class MasterViewController: UITableViewController {
 	override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 		let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as PTATableViewCell
 		
+		cell.delegate = self
+		cell.delegateOptional = self
 		cell.textLabel.text = objects[indexPath.row]
 		
-		return cell
-	}
-	
-	override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-		// Return false if you do not want the specified item to be editable.
-		return true
-	}
-	
-	override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-		if editingStyle == .Delete {
-			objects.removeAtIndex(indexPath.row)
-			tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-		} else if editingStyle == .Insert {
-			// Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
+		if indexPath.row == 0 {
+			cell.setPanGesture(.LeftToRight | .RightToLeft, mode: .Switch, color: view.tintColor, view: viewWithImage(named: "check"))
+			cell.leftToRightAttr.viewBehavior = .DragWithPanThenStick
+			cell.rightToLeftAttr.rubberbandBounce = false
+		} else {
+			let redColor = UIColor(red: 232.0/255.0, green: 61.0/255.0, blue: 14.0/255.0, alpha: 1.0)
+			
+			cell.setPanGesture(.LeftToRight, mode: .Switch, color: view.tintColor, view: viewWithImage(named: "check"))
+			cell.setPanGesture(.RightToLeft, mode: .Exit, color: redColor, view: viewWithImage(named: "cross"))
+			
+			cell.rightToLeftAttr.triggerPercentage = 0.4
+			cell.rightToLeftAttr.rubberbandBounce = false
+			cell.rightToLeftAttr.viewBehavior = .DragWithPan
 		}
+		
+		return cell
 	}
 	
 	override func tableView(tableView: UITableView!, didSelectRowAtIndexPath indexPath: NSIndexPath!) {
@@ -74,5 +83,37 @@ class MasterViewController: UITableViewController {
 	}
 	
 	// #pragma mark - Pan Trigger Action
+	
+	func tableViewCell(cell: PTATableViewCell, didTriggerState state: PTATableViewCellState, withMode mode: PTATableViewCellMode) {
+		let indexPath = tableView.indexPathForCell(cell)
+		
+		switch mode {
+		case .Switch:
+			println("row \(indexPath.row)'s switch was triggered")
+		case .Exit:
+			println("row \(indexPath.row)'s exit was triggered")
+			objects.removeAtIndex(indexPath.row)
+			tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+		default:
+			break
+		}
+	}
+	
+	// #pragma mark - Pan Trigger Action Optional
+	
+	func tableViewCellDidStartSwiping(cell: PTATableViewCell) {
+		let indexPath = tableView.indexPathForCell(cell)
+		println("row \(indexPath.row) started swiping")
+	}
+	
+	func tableViewCellDidSwipe(cell: PTATableViewCell, withPercentage percentage: Double) {
+		let indexPath = tableView.indexPathForCell(cell)
+		println("row \(indexPath.row) did swipe with percentage: \(percentage * 100.0)")
+	}
+	
+	func tableViewCellDidEndSwiping(cell: PTATableViewCell) {
+		let indexPath = tableView.indexPathForCell(cell)
+		println("row \(indexPath.row) ended swiping")
+	}
 	
 }
