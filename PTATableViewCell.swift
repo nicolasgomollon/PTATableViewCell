@@ -2,8 +2,8 @@
 //  PTATableViewCell.swift
 //  PTATableViewCell
 //
-//  Created by Nicolas Gomollon on 6/18/14.
-//  Copyright (c) 2014 Techno-Magic. All rights reserved.
+//  Objective-C code Copyright (c) 2014 Ali Karagoz. All rights reserved.
+//  Swift adaptation Copyright (c) 2014 Nicolas Gomollon. All rights reserved.
 //
 
 import Foundation
