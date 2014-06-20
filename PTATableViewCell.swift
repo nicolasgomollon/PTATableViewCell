@@ -186,46 +186,6 @@ class PTATableViewCell: UITableViewCell {
 	}
 	}
 	
-	var _contentSnapshotView: UIView?
-	var contentSnapshotView: UIView! {
-	get {
-		if let contentSnapshotView = _contentSnapshotView {
-			return contentSnapshotView
-		}
-		
-		let isContentViewBackgroundClear = !contentView.backgroundColor
-		if isContentViewBackgroundClear {
-			contentView.backgroundColor = (backgroundColor == UIColor.clearColor()) ? UIColor.whiteColor() : backgroundColor
-		}
-		
-		_contentSnapshotView = snapshotViewAfterScreenUpdates(true)
-		
-		if isContentViewBackgroundClear {
-			contentView.backgroundColor = nil
-		}
-		
-		addSubview(colorIndicatorView)
-		colorIndicatorView.addSubview(slidingView)
-		addSubview(_contentSnapshotView)
-		
-		return _contentSnapshotView
-	}
-	set {
-		if newValue {
-			_contentSnapshotView = newValue
-		} else {
-			slidingView?.removeFromSuperview()
-			slidingView = nil
-			
-			colorIndicatorView?.removeFromSuperview()
-			colorIndicatorView = nil
-			
-			_contentSnapshotView?.removeFromSuperview()
-			_contentSnapshotView = nil
-		}
-	}
-	}
-	
 	func addSubviewToSlidingView(view: UIView) {
 		for subview in slidingView.subviews as Array<UIView> {
 			subview.removeFromSuperview()
@@ -248,10 +208,30 @@ class PTATableViewCell: UITableViewCell {
 	override func prepareForReuse() {
 		super.prepareForReuse()
 		
-		contentSnapshotView = nil
+		removeSwipingView()
 		stateOptions = .None
 		leftToRightAttr = PTATableViewCellStateAttributes()
 		rightToLeftAttr = PTATableViewCellStateAttributes()
+	}
+	
+}
+
+extension PTATableViewCell {
+	
+	func setupSwipingView() {
+		if _colorIndicatorView { return }
+		colorIndicatorView.addSubview(slidingView)
+		insertSubview(colorIndicatorView, belowSubview: contentView)
+	}
+	
+	func removeSwipingView() {
+		if !_colorIndicatorView { return }
+		
+		slidingView?.removeFromSuperview()
+		slidingView = nil
+		
+		colorIndicatorView?.removeFromSuperview()
+		colorIndicatorView = nil
 	}
 	
 }
@@ -439,13 +419,13 @@ extension PTATableViewCell {
 			origin += CGRectGetWidth(bounds)
 		}
 		
-		var frame = contentSnapshotView.frame
+		var frame = contentView.frame
 		frame.origin.x = origin
 		
 		colorIndicatorView.backgroundColor = colorWith(percentage: percentage)
 		
 		UIView.animateWithDuration(duration, delay: 0.0, options: (.CurveEaseOut | .AllowUserInteraction), animations: {
-				self.contentSnapshotView.frame = frame
+				self.contentView.frame = frame
 				self.slidingView.alpha = 0.0
 				self.slideViewWith(percentage: self.percentageWith(offset: origin, relativeToWidth: CGRectGetWidth(self.bounds)), view: self.viewWith(percentage: percentage), andDragBehavior: self.viewBehaviorWith(percentage: percentage))
 			}, completion: { (completed: Bool) -> Void in
@@ -459,12 +439,12 @@ extension PTATableViewCell {
 		let offset = offsetWith(percentage: percentage, relativeToWidth: CGRectGetWidth(bounds))
 		
 		UIView.animateWithDuration(0.3, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: offset / 100.0, options: (.CurveEaseOut | .AllowUserInteraction), animations: {
-				self.contentSnapshotView.frame = self.contentView.bounds
+				self.contentView.frame = self.contentView.bounds
 				self.colorIndicatorView.backgroundColor = self.defaultColor
 				self.slidingView.alpha = 0.0
 				self.slideViewWith(percentage: 0.0, view: self.viewWith(percentage: percentage), andDragBehavior: .None)
 			}, completion: { (completed: Bool) -> Void in
-				self.contentSnapshotView = nil
+				self.removeSwipingView()
 			})
 	}
 	
@@ -532,7 +512,9 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 		direction = directionWith(percentage: percentage)
 		
 		if (gesture.state == UIGestureRecognizerState.Began) || (gesture.state == UIGestureRecognizerState.Changed) {
-			contentSnapshotView.frame = CGRectOffset(contentView.bounds, actualTranslation.x, 0.0)
+			setupSwipingView()
+			
+			contentView.frame = CGRectOffset(contentView.bounds, actualTranslation.x, 0.0)
 			colorIndicatorView.backgroundColor = colorWith(percentage: percentage)
 			slidingView.alpha = alphaWith(percentage: percentage)
 			
