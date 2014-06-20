@@ -363,14 +363,11 @@ extension PTATableViewCell {
 		}
 		
 		if var activeView = view {
-			let activeViewSize = activeView.bounds.size
-			let activeViewFrame = CGRectMake(
-				position.x - (activeViewSize.width / 2.0),
-				position.y - (activeViewSize.height / 2.0),
-				activeViewSize.width,
-				activeViewSize.height)
+			var activeViewFrame = activeView.bounds
+			activeViewFrame.origin.x = position.x - (activeViewFrame.size.width / 2.0)
+			activeViewFrame.origin.y = position.y - (activeViewFrame.size.height / 2.0)
 			
-			slidingView.frame = CGRectIntegral(activeViewFrame)
+			slidingView.frame = activeViewFrame
 		}
 	}
 	
