@@ -10,34 +10,64 @@ import Foundation
 import UIKit
 
 
-protocol PTATableViewCellDelegate: NSObjectProtocol {
-	
-	func tableViewCell(cell: PTATableViewCell, didTriggerState state: PTATableViewCellState, withMode mode: PTATableViewCellMode)
-	
-}
-
 @objc
-protocol PTATableViewCellDelegateOptional: NSObjectProtocol {
+protocol ObjC_PTATableViewCellDelegate: NSObjectProtocol {
 	
-	@optional func tableViewCellDidSwipe(cell: PTATableViewCell, withPercentage percentage: Double)
+	/** Asks the delegate whether a given cell should be swiped. Defaults to `true` if not implemented. */
+	@optional func tableViewCellShouldSwipe(cell: PTATableViewCell) -> Bool
 	
+	/** Tells the delegate that the specified cell is being swiped with a percentage. */
+	@optional func tableViewCellIsSwiping(cell: PTATableViewCell, withPercentage percentage: Double)
+	
+	/** Tells the delegate that the specified cell started swiping. */
 	@optional func tableViewCellDidStartSwiping(cell: PTATableViewCell)
 	
+	/** Tells the delegate that the specified cell ended swiping. */
 	@optional func tableViewCellDidEndSwiping(cell: PTATableViewCell)
 	
 }
 
+/** The delegate of a PTATableViewCell object must adopt the PTATableViewCellDelegate protocol in order to perform an action when triggered. Optional methods of the protocol allow the delegate to be notified of a cell’s swipe state, and determine whether a cell should be swiped. */
+protocol PTATableViewCellDelegate: ObjC_PTATableViewCellDelegate {
+	
+	/** Tells the delegate that the specified cell’s state was triggered. */
+	func tableViewCell(cell: PTATableViewCell, didTriggerState state: PTATableViewCellState, withMode mode: PTATableViewCellMode)
+	
+}
 
+
+/** Describes the mode used during a pan. */
 enum PTATableViewCellMode {
-	case None, Switch, Exit
+	
+	/** The pan to trigger action is effectively disabled. */
+	case None
+	
+	/** The cell bounces back to its original position after it’s released. */
+	case Switch
+	
+	/** The cell slides off screen in the direction it’s being dragged ONLY if it’s released after `triggerPercentage` is reached. If `triggerPercentage` is NOT reached when the cell is released, the cell bounces back to its original position. */
+	case Exit
 }
 
 
+/** Describes the slide behaviors that the sliding view can use when the cell is dragged. */
 enum PTATableViewCellSlidingViewBehavior {
-	case None, DragWithPanThenStick, StickThenDragWithPan, DragWithPan
+	
+	/** The view remains still as the cell is dragged. */
+	case None
+	
+	/** The view is dragged with the cell until `triggerPercentage` is reached, at which point the view remains still. */
+	case DragWithPanThenStick
+	
+	/** The view remains still until `triggerPercentage` is reached, at which point the view is dragged with the cell. */
+	case StickThenDragWithPan
+	
+	/** The view is dragged with the cell. */
+	case DragWithPan
 }
 
 
+/** Describes the state that has been triggered by the user. */
 struct PTATableViewCellState: RawOptionSet {
 	var value: UInt = 0
 	init(_ value: UInt) { self.value = value }
@@ -46,21 +76,38 @@ struct PTATableViewCellState: RawOptionSet {
 	static func fromRaw(raw: UInt) -> PTATableViewCellState? { return PTATableViewCellState(raw) }
 	static func fromMask(raw: UInt) -> PTATableViewCellState { return PTATableViewCellState(raw) }
 	
+	/** No state has been triggered. */
 	static var None: PTATableViewCellState			{ return PTATableViewCellState(0) }
+	
+	/** The state triggered during a left-to-right swipe. */
 	static var LeftToRight: PTATableViewCellState	{ return PTATableViewCellState(1 << 0) }
+	
+	/** The state triggered during a right-to-left swipe. */
 	static var RightToLeft: PTATableViewCellState	{ return PTATableViewCellState(1 << 1) }
 }
 
 func == (left: PTATableViewCellState, right: PTATableViewCellState) -> Bool { return left.value == right.value }
 
 
+/** The attributes used when swiping the cell in a specific state. */
 class PTATableViewCellStateAttributes {
 	
+	/** The mode to use with the cell state. Defaults to `.None`. */
 	var mode: PTATableViewCellMode
+	
+	/** The percent of the width of the cell required to be panned before the action is triggered. Defaults to 20%. */
 	var triggerPercentage: Double
+	
+	/** The rubberband effect applied the farther the cell is dragged. Defaults to `true`. */
 	var rubberbandBounce: Bool
+	
+	/** The color that’s revealed when an action is triggered. Defaults to `nil`. */
 	var color: UIColor?
+	
+	/** The view below the cell that’s revealed when an action is triggered. Defaults to `nil`. */
 	var view: UIView?
+	
+	/** The slide behavior that `view` should use when the cell is panned. Defaults to `.StickThenDragWithPan`. */
 	var viewBehavior: PTATableViewCellSlidingViewBehavior
 	
 	convenience init() {
@@ -81,16 +128,28 @@ class PTATableViewCellStateAttributes {
 
 class PTATableViewCell: UITableViewCell {
 	
-	var defaultColor = UIColor(red: 227.0/255.0, green: 227.0/255.0, blue: 227.0/255.0, alpha: 1.0)
-	
+	/** The object that acts as the delegate of the receiving table view cell. */
 	var delegate: PTATableViewCellDelegate!
-	var delegateOptional: PTATableViewCellDelegateOptional!
+	
+	/** For internal use. DO NOT set this value directly. */
 	var panGestureRecognizer: UIPanGestureRecognizer!
+	
+	/** For internal use. DO NOT set this value directly. */
 	var direction: PTATableViewCellState = .None
 	
+	/** For internal use. DO NOT set this value directly—use `setPanGesture(state:mode:color:view:)` instead. */
 	var stateOptions: PTATableViewCellState = .None
+	
+	
+	/** The color that’s revealed before an action is triggered. Defaults to a light gray color. */
+	var defaultColor = UIColor(red: 227.0/255.0, green: 227.0/255.0, blue: 227.0/255.0, alpha: 1.0)
+	
+	/** The attributes used when swiping the cell from left to right. */
 	var leftToRightAttr = PTATableViewCellStateAttributes()
+	
+	/** The attributes used when swiping the cell from right to left. */
 	var rightToLeftAttr = PTATableViewCellStateAttributes()
+	
 	
 	var _slidingView: UIView?
 	var slidingView: UIView! {
@@ -442,7 +501,7 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 					return false
 				}
 				
-				delegateOptional?.tableViewCellDidStartSwiping?(self)
+				delegate?.tableViewCellDidStartSwiping?(self)
 				return true
 			}
 		}
@@ -450,6 +509,10 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 	}
 	
 	func pan(gesture: UIPanGestureRecognizer) {
+		if let shouldSwipe = delegate?.tableViewCellShouldSwipe?(self) {
+			if !shouldSwipe { return }
+		}
+		
 		let width = CGRectGetWidth(bounds)
 		
 		let translation = gesture.translationInView(self)
@@ -478,7 +541,7 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 			}
 			slideViewWith(percentage: percentage)
 			
-			delegateOptional?.tableViewCellDidSwipe?(self, withPercentage: percentage)
+			delegate?.tableViewCellIsSwiping?(self, withPercentage: percentage)
 		} else if (gesture.state == UIGestureRecognizerState.Ended) || (gesture.state == UIGestureRecognizerState.Cancelled) {
 			let cellState = stateWith(percentage: percentage)
 			var cellMode: PTATableViewCellMode = .None
@@ -495,7 +558,7 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 				swipeToOriginWith(percentage: percentage)
 			}
 			
-			delegateOptional?.tableViewCellDidEndSwiping?(self)
+			delegate?.tableViewCellDidEndSwiping?(self)
 		}
 	}
 	
@@ -503,6 +566,7 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 
 extension PTATableViewCell {
 	
+	/** Sets a pan gesture for the specified state and mode. Don’t forget to implement the delegate method `tableViewCell(cell:didTriggerState:withMode:)` to perform an action when the cell’s state is triggered. */
 	func setPanGesture(state: PTATableViewCellState, mode: PTATableViewCellMode, color: UIColor?, view: UIView?) {
 			stateOptions = stateOptions | state
 			

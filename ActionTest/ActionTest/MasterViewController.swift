@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MasterViewController: UITableViewController, PTATableViewCellDelegate, PTATableViewCellDelegateOptional {
+class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 	
 	var objects = ["Swipe Me Left or Right", "Swipe Me Left to Delete"]
 	
@@ -56,12 +56,15 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate, PTA
 		let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as PTATableViewCell
 		
 		cell.delegate = self
-		cell.delegateOptional = self
 		cell.textLabel.text = objects[indexPath.row]
 		
 		if indexPath.row == 0 {
+			let greenColor = UIColor(red: 85.0/255.0, green: 213.0/255.0, blue: 80.0/255.0, alpha: 1.0)
+			
 			cell.setPanGesture(.LeftToRight | .RightToLeft, mode: .Switch, color: view.tintColor, view: viewWithImage(named: "check"))
+			
 			cell.leftToRightAttr.viewBehavior = .DragWithPanThenStick
+			cell.leftToRightAttr.color = greenColor
 			cell.rightToLeftAttr.rubberbandBounce = false
 		} else {
 			let redColor = UIColor(red: 232.0/255.0, green: 61.0/255.0, blue: 14.0/255.0, alpha: 1.0)
@@ -82,7 +85,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate, PTA
 		// Implement your own `tableView:didSelectRowAtIndexPath:` here.
 	}
 	
-	// #pragma mark - Pan Trigger Action
+	// #pragma mark - Pan Trigger Action (Required)
 	
 	func tableViewCell(cell: PTATableViewCell, didTriggerState state: PTATableViewCellState, withMode mode: PTATableViewCellMode) {
 		let indexPath = tableView.indexPathForCell(cell)
@@ -99,16 +102,16 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate, PTA
 		}
 	}
 	
-	// #pragma mark - Pan Trigger Action Optional
+	// #pragma mark - Pan Trigger Action (Optional)
 	
 	func tableViewCellDidStartSwiping(cell: PTATableViewCell) {
 		let indexPath = tableView.indexPathForCell(cell)
 		println("row \(indexPath.row) started swiping")
 	}
 	
-	func tableViewCellDidSwipe(cell: PTATableViewCell, withPercentage percentage: Double) {
+	func tableViewCellIsSwiping(cell: PTATableViewCell, withPercentage percentage: Double) {
 		let indexPath = tableView.indexPathForCell(cell)
-		println("row \(indexPath.row) did swipe with percentage: \(percentage * 100.0)")
+		println("row \(indexPath.row) is being swiped with percentage: \(percentage * 100.0)")
 	}
 	
 	func tableViewCellDidEndSwiping(cell: PTATableViewCell) {
