@@ -7,8 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "DetailViewController.h"
+#import "PTATableViewCell.h"
 
-@interface MasterViewController : UITableViewController
+@interface MasterViewController : UITableViewController <PTATableViewCellDelegate>
 
 @end

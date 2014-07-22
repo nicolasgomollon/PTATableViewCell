@@ -18,18 +18,15 @@
 - (void)loadView {
 	[super loadView];
 	self.title = @"Master";
+	[self.tableView registerClass:[PTATableViewCell class] forCellReuseIdentifier:@"Cell"];
+	_objects = [[NSMutableArray alloc] initWithArray:@[@"Swipe Me Left or Right", @"Swipe Me Left to Delete"]];
 }
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
 	
 	// Do any additional setup after loading the view, typically from a nib.
-	self.navigationItem.leftBarButtonItem = self.editButtonItem;
-	
-	UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
-	self.navigationItem.rightBarButtonItem = addButton;
-	
-	[self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"Cell"];
+	self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -38,12 +35,15 @@
 }
 
 - (void)insertNewObject:(id)sender {
-	if (!_objects) {
-		_objects = [[NSMutableArray alloc] init];
-	}
-	[_objects insertObject:[NSDate date] atIndex:0];
-	NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+	[_objects addObject:@"Swipe Me Left to Delete"];
+	NSIndexPath *indexPath = [NSIndexPath indexPathForRow:(_objects.count - 1) inSection:0];
 	[self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+}
+
+- (UIView *)viewWithImageNamed:(NSString *)named {
+	UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:named]];
+	imageView.contentMode = UIViewContentModeCenter;
+	return imageView;
 }
 
 #pragma mark - Table View
@@ -57,48 +57,74 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
-
-	NSDate *object = _objects[indexPath.row];
-	cell.textLabel.text = [object description];
+	PTATableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
+	
+	cell.delegate = self;
+	cell.textLabel.text = _objects[indexPath.row];
+	
+	if (indexPath.row == 0) {
+		UIColor *greenColor = [UIColor colorWithRed:85.0f/255.0f green:213.0f/255.0f blue:80.0f/255.0f alpha:1.0f];
+		
+		[cell setPanGestureState:(PTATableViewCellStateLeftToRight | PTATableViewCellStateRightToLeft) mode:PTATableViewCellModeSwitch color:self.view.tintColor view:[self viewWithImageNamed:@"check"]];
+		
+		cell.leftToRightAttr.viewBehavior = PTATableViewCellSlidingViewBehaviorDragWithPanThenStick;
+		cell.leftToRightAttr.color = greenColor;
+		cell.rightToLeftAttr.rubberbandBounce = NO;
+	} else {
+		UIColor *redColor = [UIColor colorWithRed:232.0f/255.0f green:61.0f/255.0f blue:14.0f/255.0f alpha:1.0f];
+		
+		[cell setPanGestureState:PTATableViewCellStateLeftToRight mode:PTATableViewCellModeSwitch color:self.view.tintColor view:[self viewWithImageNamed:@"check"]];
+		[cell setPanGestureState:PTATableViewCellStateRightToLeft mode:PTATableViewCellModeExit color:redColor view:[self viewWithImageNamed:@"cross"]];
+		
+		cell.rightToLeftAttr.triggerPercentage = 0.4f;
+		cell.rightToLeftAttr.rubberbandBounce = NO;
+		cell.rightToLeftAttr.viewBehavior = PTATableViewCellSlidingViewBehaviorDragWithPan;
+	}
+	
 	return cell;
 }
 
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-	// Return NO if you do not want the specified item to be editable.
-	return YES;
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	[self.tableView deselectRowAtIndexPath:indexPath animated:YES];
+	// Implement your own `tableView:didSelectRowAtIndexPath:` here.
 }
 
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-	if (editingStyle == UITableViewCellEditingStyleDelete) {
-		[_objects removeObjectAtIndex:indexPath.row];
-		[tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-	} else if (editingStyle == UITableViewCellEditingStyleInsert) {
-		// Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
+#pragma mark - Pan Trigger Action (Required)
+
+- (void)tableViewCell:(PTATableViewCell *)cell didTriggerState:(PTATableViewCellState)state withMode:(PTATableViewCellMode)mode {
+	NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+	
+	switch (mode) {
+		case PTATableViewCellModeSwitch:
+			NSLog(@"row %li's switch was triggered", (long)indexPath.row);
+			break;
+			
+		case PTATableViewCellModeExit:
+			NSLog(@"row %li's exit was triggered", (long)indexPath.row);
+			[_objects removeObjectAtIndex:indexPath.row];
+			[self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+			break;
+			
+		default:
+			break;
 	}
 }
 
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
-}
-*/
+#pragma mark - Pan Trigger Action (Optional)
 
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-	// Return NO if you do not want the item to be re-orderable.
-	return YES;
+- (void)tableViewCellDidStartSwiping:(PTATableViewCell *)cell {
+	NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+	NSLog(@"row %li started swiping", (long)indexPath.row);
 }
-*/
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	NSDate *object = _objects[indexPath.row];
-	
-	DetailViewController *detailVC = [[DetailViewController alloc] init];
-	[detailVC setDetailItem:object];
-	
-	[self.navigationController pushViewController:detailVC animated:YES];
+- (void)tableViewCellIsSwiping:(PTATableViewCell *)cell withPercentage:(CGFloat)percentage {
+	NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+	NSLog(@"row %li is being swiped with percentage: %0.1f", (long)indexPath.row, percentage * 100.0f);
+}
+
+- (void)tableViewCellDidEndSwiping:(PTATableViewCell *)cell {
+	NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+	NSLog(@"row %li ended swiping", (long)indexPath.row);
 }
 
 @end
