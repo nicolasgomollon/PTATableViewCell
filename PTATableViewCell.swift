@@ -75,6 +75,7 @@ struct PTATableViewCellState: RawOptionSet {
 	func getLogicValue() -> Bool { return self.value != 0 }
 	static func fromRaw(raw: UInt) -> PTATableViewCellState? { return PTATableViewCellState(raw) }
 	static func fromMask(raw: UInt) -> PTATableViewCellState { return PTATableViewCellState(raw) }
+	static func convertFromNilLiteral() -> PTATableViewCellState { return PTATableViewCellState(0) }
 	
 	/** No state has been triggered. */
 	static var None: PTATableViewCellState			{ return PTATableViewCellState(0) }
