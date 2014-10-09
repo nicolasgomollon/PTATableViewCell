@@ -40,6 +40,7 @@
 		direction = PTATableViewCellStateNone;
 		stateOptions = PTATableViewCellStateNone;
 		defaultColor = [UIColor colorWithRed:227.0f/255.0f green:227.0f/255.0f blue:227.0f/255.0f alpha:1.0f];
+		self.contentView.backgroundColor = [UIColor whiteColor];
 		[self initialize];
 	}
 	return self;
