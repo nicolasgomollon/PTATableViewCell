@@ -13,7 +13,7 @@ Here’s an example usage, with various attributes modified to show a few of the
 override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 	let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as PTATableViewCell
 	
-	cell.textLabel.text = objects[indexPath.row]
+	cell.textLabel?.text = objects[indexPath.row]
 	
 
 	cell.delegate = self
@@ -37,19 +37,19 @@ It’s **important** that you implement the following delegate method to perform
 
 ```swift
 func tableViewCell(cell: PTATableViewCell, didTriggerState state: PTATableViewCellState, withMode mode: PTATableViewCellMode) {
-	let indexPath = tableView.indexPathForCell(cell)
-	
-	switch mode {
-	case .Switch:
-		println("row \(indexPath.row)'s switch was triggered")
-		// Do something interesting here.
-	case .Exit:
-		println("row \(indexPath.row)'s exit was triggered")
-		// Do something interesting here.
-		objects.removeAtIndex(indexPath.row)
-		tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-	default:
-		break
+	if let indexPath = tableView.indexPathForCell(cell) {
+		switch mode {
+		case .Switch:
+			println("row \(indexPath.row)'s switch was triggered")
+			// Do something interesting here.
+		case .Exit:
+			println("row \(indexPath.row)'s exit was triggered")
+			// Do something interesting here.
+			objects.removeAtIndex(indexPath.row)
+			tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+		default:
+			break
+		}
 	}
 }
 ```

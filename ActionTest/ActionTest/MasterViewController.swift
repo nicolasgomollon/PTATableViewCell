@@ -31,7 +31,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 	}
 	
 	func insertNewObject(sender: AnyObject) {
-		objects += "Swipe Me Left to Delete"
+		objects += ["Swipe Me Left to Delete"]
 		let indexPath = NSIndexPath(forRow: (objects.count - 1), inSection: 0)
 		self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
 	}
@@ -56,7 +56,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as PTATableViewCell
 		
 		cell.delegate = self
-		cell.textLabel.text = objects[indexPath.row]
+		cell.textLabel?.text = objects[indexPath.row]
 		
 		if indexPath.row == 0 {
 			let greenColor = UIColor(red: 85.0/255.0, green: 213.0/255.0, blue: 80.0/255.0, alpha: 1.0)
@@ -80,7 +80,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		return cell
 	}
 	
-	override func tableView(tableView: UITableView!, didSelectRowAtIndexPath indexPath: NSIndexPath!) {
+	override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
 		tableView.deselectRowAtIndexPath(indexPath, animated: true)
 		// Implement your own `tableView:didSelectRowAtIndexPath:` here.
 	}
@@ -88,35 +88,38 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 	// #pragma mark - Pan Trigger Action (Required)
 	
 	func tableViewCell(cell: PTATableViewCell, didTriggerState state: PTATableViewCellState, withMode mode: PTATableViewCellMode) {
-		let indexPath = tableView.indexPathForCell(cell)
-		
-		switch mode {
-		case .Switch:
-			println("row \(indexPath.row)'s switch was triggered")
-		case .Exit:
-			println("row \(indexPath.row)'s exit was triggered")
-			objects.removeAtIndex(indexPath.row)
-			tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-		default:
-			break
+		if let indexPath = tableView.indexPathForCell(cell) {
+			switch mode {
+			case .Switch:
+				println("row \(indexPath.row)'s switch was triggered")
+			case .Exit:
+				println("row \(indexPath.row)'s exit was triggered")
+				objects.removeAtIndex(indexPath.row)
+				tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+			default:
+				break
+			}
 		}
 	}
 	
 	// #pragma mark - Pan Trigger Action (Optional)
 	
 	func tableViewCellDidStartSwiping(cell: PTATableViewCell) {
-		let indexPath = tableView.indexPathForCell(cell)
-		println("row \(indexPath.row) started swiping")
+		if let indexPath = tableView.indexPathForCell(cell) {
+			println("row \(indexPath.row) started swiping")
+		}
 	}
 	
 	func tableViewCellIsSwiping(cell: PTATableViewCell, withPercentage percentage: Double) {
-		let indexPath = tableView.indexPathForCell(cell)
-		println("row \(indexPath.row) is being swiped with percentage: \(percentage * 100.0)")
+		if let indexPath = tableView.indexPathForCell(cell) {
+			println("row \(indexPath.row) is being swiped with percentage: \(percentage * 100.0)")
+		}
 	}
 	
 	func tableViewCellDidEndSwiping(cell: PTATableViewCell) {
-		let indexPath = tableView.indexPathForCell(cell)
-		println("row \(indexPath.row) ended swiping")
+		if let indexPath = tableView.indexPathForCell(cell) {
+			println("row \(indexPath.row) ended swiping")
+		}
 	}
 	
 }

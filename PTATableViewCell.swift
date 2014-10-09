@@ -14,16 +14,16 @@ import UIKit
 protocol ObjC_PTATableViewCellDelegate: NSObjectProtocol {
 	
 	/** Asks the delegate whether a given cell should be swiped. Defaults to `true` if not implemented. */
-	@optional func tableViewCellShouldSwipe(cell: PTATableViewCell) -> Bool
+	optional func tableViewCellShouldSwipe(cell: PTATableViewCell) -> Bool
 	
 	/** Tells the delegate that the specified cell is being swiped with a percentage. */
-	@optional func tableViewCellIsSwiping(cell: PTATableViewCell, withPercentage percentage: Double)
+	optional func tableViewCellIsSwiping(cell: PTATableViewCell, withPercentage percentage: Double)
 	
 	/** Tells the delegate that the specified cell started swiping. */
-	@optional func tableViewCellDidStartSwiping(cell: PTATableViewCell)
+	optional func tableViewCellDidStartSwiping(cell: PTATableViewCell)
 	
 	/** Tells the delegate that the specified cell ended swiping. */
-	@optional func tableViewCellDidEndSwiping(cell: PTATableViewCell)
+	optional func tableViewCellDidEndSwiping(cell: PTATableViewCell)
 	
 }
 
@@ -68,23 +68,38 @@ enum PTATableViewCellSlidingViewBehavior {
 
 
 /** Describes the state that has been triggered by the user. */
-struct PTATableViewCellState: RawOptionSet {
-	var value: UInt = 0
-	init(_ value: UInt) { self.value = value }
+struct PTATableViewCellState: RawOptionSetType, BooleanType {
+	private var value: UInt = 0
+	
+	init(_ rawValue: UInt) { self.value = rawValue }
+	
+	// MARK: RawOptionSetType
+	init(rawValue: UInt) { self.value = rawValue }
+	
+	// MARK: NilLiteralConvertible
+	init(nilLiteral: ()) { self.value = 0}
+	static func convertFromNilLiteral() -> PTATableViewCellState { return self(0) }
+	
+	// MARK: RawRepresentable
+	var rawValue: UInt { return self.value }
 	func toRaw() -> UInt { return self.value }
-	func getLogicValue() -> Bool { return self.value != 0 }
-	static func fromRaw(raw: UInt) -> PTATableViewCellState? { return PTATableViewCellState(raw) }
-	static func fromMask(raw: UInt) -> PTATableViewCellState { return PTATableViewCellState(raw) }
-	static func convertFromNilLiteral() -> PTATableViewCellState { return PTATableViewCellState(0) }
+	static func fromRaw(raw: UInt) -> PTATableViewCellState? { return self(raw) }
+	
+	// MARK: BooleanType
+	var boolValue: Bool { return self.value != 0 }
+	
+	// MARK: BitwiseOperationsType
+	static var allZeros: PTATableViewCellState { return self(0) }
+	static func fromMask(raw: UInt) -> PTATableViewCellState { return self(raw) }
 	
 	/** No state has been triggered. */
-	static var None: PTATableViewCellState			{ return PTATableViewCellState(0) }
+	static var None: PTATableViewCellState			{ return self(0) }
 	
 	/** The state triggered during a left-to-right swipe. */
-	static var LeftToRight: PTATableViewCellState	{ return PTATableViewCellState(1 << 0) }
+	static var LeftToRight: PTATableViewCellState	{ return self(1 << 0) }
 	
 	/** The state triggered during a right-to-left swipe. */
-	static var RightToLeft: PTATableViewCellState	{ return PTATableViewCellState(1 << 1) }
+	static var RightToLeft: PTATableViewCellState	{ return self(1 << 1) }
 }
 
 func == (left: PTATableViewCellState, right: PTATableViewCellState) -> Bool { return left.value == right.value }
@@ -195,12 +210,18 @@ class PTATableViewCell: UITableViewCell {
 	}
 	
 	
-	init(style: UITableViewCellStyle, reuseIdentifier: String!) {
+	override init(style: UITableViewCellStyle, reuseIdentifier: String!) {
 		super.init(style: style, reuseIdentifier: reuseIdentifier)
 		initialize()
 	}
 	
+	required init(coder aDecoder: NSCoder) {
+		super.init(coder: aDecoder)
+		initialize()
+	}
+	
 	func initialize() {
+		contentView.backgroundColor = UIColor.whiteColor()
 		panGestureRecognizer = UIPanGestureRecognizer(target: self, action: "pan:")
 		panGestureRecognizer.delegate = self
 		addGestureRecognizer(panGestureRecognizer)
@@ -220,13 +241,13 @@ class PTATableViewCell: UITableViewCell {
 extension PTATableViewCell {
 	
 	func setupSwipingView() {
-		if _colorIndicatorView { return }
+		if _colorIndicatorView != nil { return }
 		colorIndicatorView.addSubview(slidingView)
 		insertSubview(colorIndicatorView, belowSubview: contentView)
 	}
 	
 	func removeSwipingView() {
-		if !_colorIndicatorView { return }
+		if _colorIndicatorView == nil { return }
 		
 		slidingView?.removeFromSuperview()
 		slidingView = nil
@@ -251,6 +272,10 @@ extension PTATableViewCell {
 		return offset
 	}
 	
+	func offsetWith(#percentage: Double, relativeToWidth width: CGFloat) -> CGFloat {
+		return CGFloat(offsetWith(percentage: percentage, relativeToWidth: Double(width)))
+	}
+	
 	func percentageWith(#offset: Double, relativeToWidth width: Double) -> Double {
 		var percentage = offset / width
 		
@@ -261,6 +286,18 @@ extension PTATableViewCell {
 		}
 		
 		return percentage
+	}
+	
+	func percentageWith(#offset: Double, relativeToWidth width: CGFloat) -> Double {
+		return percentageWith(offset: offset, relativeToWidth: Double(width))
+	}
+	
+	func percentageWith(#offset: CGFloat, relativeToWidth width: Double) -> Double {
+		return percentageWith(offset: Double(offset), relativeToWidth: width)
+	}
+	
+	func percentageWith(#offset: CGFloat, relativeToWidth width: CGFloat) -> Double {
+		return percentageWith(offset: Double(offset), relativeToWidth: Double(width))
 	}
 	
 	func animationDurationWith(#velocity: CGPoint) -> NSTimeInterval {
@@ -277,7 +314,7 @@ extension PTATableViewCell {
 			horizontalVelocity = width
 		}
 		
-		return (DurationHighLimit + DurationLowLimit) - abs((horizontalVelocity / width) * animationDurationDiff)
+		return (DurationHighLimit + DurationLowLimit) - abs(Double(horizontalVelocity / width) * animationDurationDiff)
 	}
 	
 	func directionWith(#percentage: Double) -> PTATableViewCellState {
@@ -307,19 +344,19 @@ extension PTATableViewCell {
 		return .None
 	}
 	
-	func alphaWith(#percentage: Double) -> Double {
+	func alphaWith(#percentage: Double) -> CGFloat {
 		if (percentage > 0.0) && (percentage < leftToRightAttr.triggerPercentage) {
-			return percentage / leftToRightAttr.triggerPercentage
+			return CGFloat(percentage / leftToRightAttr.triggerPercentage)
 		} else if (percentage < 0.0) && (percentage > -rightToLeftAttr.triggerPercentage) {
-			return abs(percentage / rightToLeftAttr.triggerPercentage)
+			return CGFloat(abs(percentage / rightToLeftAttr.triggerPercentage))
 		}
 		return 1.0
 	}
 	
 	func colorWith(#percentage: Double) -> UIColor {
-		if (percentage >= leftToRightAttr.triggerPercentage) && (leftToRightAttr.mode != .None) && leftToRightAttr.color {
+		if (percentage >= leftToRightAttr.triggerPercentage) && (leftToRightAttr.mode != .None) && (leftToRightAttr.color != nil) {
 			return leftToRightAttr.color!
-		} else if (percentage <= -rightToLeftAttr.triggerPercentage) && (rightToLeftAttr.mode != .None) && rightToLeftAttr.color {
+		} else if (percentage <= -rightToLeftAttr.triggerPercentage) && (rightToLeftAttr.mode != .None) && (rightToLeftAttr.color != nil) {
 			return rightToLeftAttr.color!
 		}
 		return defaultColor
@@ -412,7 +449,7 @@ extension PTATableViewCell {
 	}
 	
 	func moveWith(#percentage: Double, duration: NSTimeInterval, direction: PTATableViewCellState) {
-		var origin = 0.0
+		var origin: CGFloat = 0.0
 		
 		if direction == .RightToLeft {
 			origin -= CGRectGetWidth(bounds)
@@ -469,7 +506,7 @@ extension PTATableViewCell {
 
 extension PTATableViewCell: UIGestureRecognizerDelegate {
 	
-	override func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer!) -> Bool {
+	override func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
 		if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
 			let point = panGestureRecognizer.velocityInView(self)
 			if abs(point.x) > abs(point.y) {
