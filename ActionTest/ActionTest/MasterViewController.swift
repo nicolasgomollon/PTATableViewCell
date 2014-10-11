@@ -42,7 +42,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		return imageView
 	}
 	
-	// #pragma mark - Table View
+	// MARK: - Table View
 	
 	override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
 		return 1
@@ -85,7 +85,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		// Implement your own `tableView:didSelectRowAtIndexPath:` here.
 	}
 	
-	// #pragma mark - Pan Trigger Action (Required)
+	// MARK: - Pan Trigger Action (Required)
 	
 	func tableViewCell(cell: PTATableViewCell, didTriggerState state: PTATableViewCellState, withMode mode: PTATableViewCellMode) {
 		if let indexPath = tableView.indexPathForCell(cell) {
@@ -102,7 +102,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		}
 	}
 	
-	// #pragma mark - Pan Trigger Action (Optional)
+	// MARK: - Pan Trigger Action (Optional)
 	
 	func tableViewCellDidStartSwiping(cell: PTATableViewCell) {
 		if let indexPath = tableView.indexPathForCell(cell) {
