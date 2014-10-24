@@ -22,7 +22,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		super.viewDidLoad()
 		
 		// Do any additional setup after loading the view, typically from a nib.
-		self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "insertNewObject:")
+		navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "insertNewObject:")
 	}
 	
 	override func didReceiveMemoryWarning() {
@@ -33,7 +33,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 	func insertNewObject(sender: AnyObject) {
 		objects += ["Swipe Me Left to Delete"]
 		let indexPath = NSIndexPath(forRow: (objects.count - 1), inSection: 0)
-		self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+		tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
 	}
 	
 	func viewWithImage(#named: String) -> UIView {
@@ -56,7 +56,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as PTATableViewCell
 		
 		cell.delegate = self
-		cell.textLabel?.text = objects[indexPath.row]
+		cell.textLabel.text = objects[indexPath.row]
 		
 		if indexPath.row == 0 {
 			let greenColor = UIColor(red: 85.0/255.0, green: 213.0/255.0, blue: 80.0/255.0, alpha: 1.0)

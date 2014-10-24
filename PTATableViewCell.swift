@@ -221,7 +221,7 @@ class PTATableViewCell: UITableViewCell {
 	}
 	
 	func initialize() {
-		contentView.backgroundColor = UIColor.whiteColor()
+		contentView.backgroundColor = .whiteColor()
 		panGestureRecognizer = UIPanGestureRecognizer(target: self, action: "pan:")
 		panGestureRecognizer.delegate = self
 		addGestureRecognizer(panGestureRecognizer)

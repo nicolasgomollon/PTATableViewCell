@@ -13,7 +13,7 @@ Here’s an example usage, with various attributes modified to show a few of the
 override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 	let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as PTATableViewCell
 	
-	cell.textLabel?.text = objects[indexPath.row]
+	cell.textLabel.text = objects[indexPath.row]
 	
 
 	cell.delegate = self
