@@ -147,14 +147,11 @@ class PTATableViewCell: UITableViewCell {
 	/** The object that acts as the delegate of the receiving table view cell. */
 	var delegate: PTATableViewCellDelegate!
 	
-	/** For internal use. DO NOT set this value directly. */
-	var panGestureRecognizer: UIPanGestureRecognizer!
+	private var panGestureRecognizer: UIPanGestureRecognizer!
 	
-	/** For internal use. DO NOT set this value directly. */
-	var direction: PTATableViewCellState = .None
+	private var direction: PTATableViewCellState = .None
 	
-	/** For internal use. DO NOT set this value directly—use `setPanGesture(state:mode:color:view:)` instead. */
-	var stateOptions: PTATableViewCellState = .None
+	private var stateOptions: PTATableViewCellState = .None
 	
 	
 	/** The color that’s revealed before an action is triggered. Defaults to a light gray color. */
@@ -167,8 +164,8 @@ class PTATableViewCell: UITableViewCell {
 	var rightToLeftAttr = PTATableViewCellStateAttributes()
 	
 	
-	var _slidingView: UIView?
-	var slidingView: UIView! {
+	private var _slidingView: UIView?
+	private var slidingView: UIView! {
 	get {
 		if let slidingView = _slidingView {
 			return slidingView
@@ -184,8 +181,8 @@ class PTATableViewCell: UITableViewCell {
 	}
 	}
 	
-	var _colorIndicatorView: UIView?
-	var colorIndicatorView: UIView! {
+	private var _colorIndicatorView: UIView?
+	private var colorIndicatorView: UIView! {
 	get {
 		if let colorIndicatorView = _colorIndicatorView {
 			return colorIndicatorView
@@ -202,7 +199,7 @@ class PTATableViewCell: UITableViewCell {
 	}
 	}
 	
-	func addSubviewToSlidingView(view: UIView) {
+	private func addSubviewToSlidingView(view: UIView) {
 		for subview in slidingView.subviews as Array<UIView> {
 			subview.removeFromSuperview()
 		}
@@ -220,9 +217,9 @@ class PTATableViewCell: UITableViewCell {
 		initialize()
 	}
 	
-	func initialize() {
+	private func initialize() {
 		contentView.backgroundColor = .whiteColor()
-		panGestureRecognizer = UIPanGestureRecognizer(target: self, action: "pan:")
+		panGestureRecognizer = UIPanGestureRecognizer(target: self, action: "_pan:")
 		panGestureRecognizer.delegate = self
 		addGestureRecognizer(panGestureRecognizer)
 	}
@@ -238,7 +235,7 @@ class PTATableViewCell: UITableViewCell {
 	
 }
 
-extension PTATableViewCell {
+private extension PTATableViewCell {
 	
 	func setupSwipingView() {
 		if _colorIndicatorView != nil { return }
@@ -258,7 +255,7 @@ extension PTATableViewCell {
 	
 }
 
-extension PTATableViewCell {
+private extension PTATableViewCell {
 	
 	func offsetWith(#percentage: Double, relativeToWidth width: Double) -> Double {
 		var offset = percentage * width
@@ -373,7 +370,7 @@ extension PTATableViewCell {
 	
 }
 
-extension PTATableViewCell {
+private extension PTATableViewCell {
 	
 	func animateWith(#offset: Double) {
 		let percentage = percentageWith(offset: offset, relativeToWidth: CGRectGetWidth(bounds))
@@ -526,7 +523,7 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 		return false
 	}
 	
-	func pan(gesture: UIPanGestureRecognizer) {
+	func _pan(gesture: UIPanGestureRecognizer) {
 		if let shouldSwipe = delegate?.tableViewCellShouldSwipe?(self) {
 			if !shouldSwipe { return }
 		}
