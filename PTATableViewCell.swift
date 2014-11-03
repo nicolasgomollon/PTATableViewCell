@@ -399,25 +399,33 @@ private extension PTATableViewCell {
 		switch dragBehavior {
 			
 		case .StickThenDragWithPan:
-			if (percentage >= 0.0) && (percentage < leftToRightAttr.triggerPercentage) {
-				position.x = offsetWith(percentage: halfLeftToRightTriggerPercentage, relativeToWidth: width)
-			} else if percentage >= leftToRightAttr.triggerPercentage {
-				position.x = offsetWith(percentage: percentage - halfLeftToRightTriggerPercentage, relativeToWidth: width)
-			} else if (percentage < 0.0) && (percentage >= -rightToLeftAttr.triggerPercentage) {
-				position.x = width - offsetWith(percentage: halfRightToLeftTriggerPercentage, relativeToWidth: width)
-			} else if percentage <= -rightToLeftAttr.triggerPercentage {
-				position.x = width + offsetWith(percentage: percentage + halfRightToLeftTriggerPercentage, relativeToWidth: width)
+			if direction == .LeftToRight {
+				if (percentage >= 0.0) && (percentage < leftToRightAttr.triggerPercentage) {
+					position.x = offsetWith(percentage: halfLeftToRightTriggerPercentage, relativeToWidth: width)
+				} else if percentage >= leftToRightAttr.triggerPercentage {
+					position.x = offsetWith(percentage: percentage - halfLeftToRightTriggerPercentage, relativeToWidth: width)
+				}
+			} else if direction == .RightToLeft {
+				if (percentage <= 0.0) && (percentage >= -rightToLeftAttr.triggerPercentage) {
+					position.x = width - offsetWith(percentage: halfRightToLeftTriggerPercentage, relativeToWidth: width)
+				} else if percentage <= -rightToLeftAttr.triggerPercentage {
+					position.x = width + offsetWith(percentage: percentage + halfRightToLeftTriggerPercentage, relativeToWidth: width)
+				}
 			}
 			
 		case .DragWithPanThenStick:
-			if (percentage >= 0.0) && (percentage < leftToRightAttr.triggerPercentage) {
-				position.x = offsetWith(percentage: percentage - halfLeftToRightTriggerPercentage, relativeToWidth: width)
-			} else if percentage >= leftToRightAttr.triggerPercentage {
-				position.x = offsetWith(percentage: halfLeftToRightTriggerPercentage, relativeToWidth: width)
-			} else if (percentage < 0.0) && (percentage >= -rightToLeftAttr.triggerPercentage) {
-				position.x = width + offsetWith(percentage: percentage + halfRightToLeftTriggerPercentage, relativeToWidth: width)
-			} else if percentage <= -rightToLeftAttr.triggerPercentage {
-				position.x = width - offsetWith(percentage: halfRightToLeftTriggerPercentage, relativeToWidth: width)
+			if direction == .LeftToRight {
+				if (percentage >= 0.0) && (percentage < leftToRightAttr.triggerPercentage) {
+					position.x = offsetWith(percentage: percentage - halfLeftToRightTriggerPercentage, relativeToWidth: width)
+				} else if percentage >= leftToRightAttr.triggerPercentage {
+					position.x = offsetWith(percentage: halfLeftToRightTriggerPercentage, relativeToWidth: width)
+				}
+			} else if direction == .RightToLeft {
+				if (percentage <= 0.0) && (percentage >= -rightToLeftAttr.triggerPercentage) {
+					position.x = width + offsetWith(percentage: percentage + halfRightToLeftTriggerPercentage, relativeToWidth: width)
+				} else if percentage <= -rightToLeftAttr.triggerPercentage {
+					position.x = width - offsetWith(percentage: halfRightToLeftTriggerPercentage, relativeToWidth: width)
+				}
 			}
 			
 		case .DragWithPan:
@@ -477,7 +485,13 @@ private extension PTATableViewCell {
 				self.contentView.frame = self.contentView.bounds
 				self.colorIndicatorView.backgroundColor = self.defaultColor
 				self.slidingView.alpha = 0.0
-				self.slideViewWith(percentage: 0.0, view: self.viewWith(percentage: percentage), andDragBehavior: .None)
+				if ((self.stateWith(percentage: percentage) == .None) ||
+					((self.direction == .LeftToRight) && (self.leftToRightAttr.viewBehavior == .StickThenDragWithPan)) ||
+					((self.direction == .RightToLeft) && (self.rightToLeftAttr.viewBehavior == .StickThenDragWithPan))) {
+						self.slideViewWith(percentage: 0.0, view: self.viewWith(percentage: percentage), andDragBehavior: self.viewBehaviorWith(percentage: percentage))
+				} else {
+					self.slideViewWith(percentage: 0.0, view: self.viewWith(percentage: percentage), andDragBehavior: .None)
+				}
 			}, completion: { (completed: Bool) -> Void in
 				self.removeSwipingView()
 			})
