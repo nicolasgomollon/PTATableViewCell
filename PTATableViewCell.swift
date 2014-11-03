@@ -541,26 +541,19 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 		if let shouldSwipe = delegate?.tableViewCellShouldSwipe?(self) {
 			if !shouldSwipe { return }
 		}
-		
-		let width = CGRectGetWidth(bounds)
-		
-		let translation = gesture.translationInView(self)
-		let velocity = gesture.velocityInView(self)
-		let animationDuration = animationDurationWith(velocity: velocity)
-		
-		var panOffset = translation.x
-		if ((panOffset > 0.0) && leftToRightAttr.rubberbandBounce ||
-			(panOffset < 0.0) && rightToLeftAttr.rubberbandBounce) {
-			let offset = abs(panOffset)
-			panOffset = (offset * 0.55 * width) / (offset * 0.55 + width)
-			panOffset *= (translation.x < 0) ? -1.0 : 1.0
-		}
-		
-		let actualTranslation = CGPointMake(panOffset, translation.y)
-		var percentage = percentageWith(offset: actualTranslation.x, relativeToWidth: width)
+		pan(gestureState: gesture.state, translation: gesture.translationInView(self), velocity: gesture.velocityInView(self))
+	}
+	
+	func pan(#gestureState: UIGestureRecognizerState, translation: CGPoint) {
+		pan(gestureState: gestureState, translation: translation, velocity: CGPointZero)
+	}
+	
+	func pan(#gestureState: UIGestureRecognizerState, translation: CGPoint, velocity: CGPoint) {
+		let actualTranslation = actualizeTranslation(translation)
+		var percentage = percentageWith(offset: actualTranslation.x, relativeToWidth: CGRectGetWidth(bounds))
 		direction = directionWith(percentage: percentage)
 		
-		if (gesture.state == UIGestureRecognizerState.Began) || (gesture.state == UIGestureRecognizerState.Changed) {
+		if (gestureState == .Began) || (gestureState == .Changed) {
 			setupSwipingView()
 			
 			contentView.frame = CGRectOffset(contentView.bounds, actualTranslation.x, 0.0)
@@ -573,7 +566,7 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 			slideViewWith(percentage: percentage)
 			
 			delegate?.tableViewCellIsSwiping?(self, withPercentage: percentage)
-		} else if (gesture.state == UIGestureRecognizerState.Ended) || (gesture.state == UIGestureRecognizerState.Cancelled) {
+		} else if (gestureState == .Ended) || (gestureState == .Cancelled) {
 			let cellState = stateWith(percentage: percentage)
 			var cellMode: PTATableViewCellMode = .None
 			
@@ -584,13 +577,31 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 			}
 			
 			if (cellMode == .Exit) && !(direction & .None) {
-				moveWith(percentage: percentage, duration: animationDuration, direction: cellState)
+				moveWith(percentage: percentage, duration: animationDurationWith(velocity: velocity), direction: cellState)
 			} else {
 				swipeToOriginWith(percentage: percentage)
 			}
 			
 			delegate?.tableViewCellDidEndSwiping?(self)
 		}
+	}
+	
+	func actualizeTranslation(translation: CGPoint) -> CGPoint {
+		let width = CGRectGetWidth(bounds)
+		var panOffset = translation.x
+		if ((panOffset > 0.0) && leftToRightAttr.rubberbandBounce ||
+			(panOffset < 0.0) && rightToLeftAttr.rubberbandBounce) {
+				let offset = abs(panOffset)
+				panOffset = (offset * 0.55 * width) / (offset * 0.55 + width)
+				panOffset *= (translation.x < 0) ? -1.0 : 1.0
+		}
+		return CGPointMake(panOffset, translation.y)
+	}
+	
+	func reset() {
+		contentView.frame = contentView.bounds
+		colorIndicatorView.backgroundColor = defaultColor
+		removeSwipingView()
 	}
 	
 }
