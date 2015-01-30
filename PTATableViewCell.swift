@@ -532,6 +532,8 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 				
 				delegate?.tableViewCellDidStartSwiping?(self)
 				return true
+			} else {
+				return false
 			}
 		}
 		return !editing
