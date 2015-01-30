@@ -56,7 +56,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as PTATableViewCell
 		
 		cell.delegate = self
-		cell.textLabel.text = objects[indexPath.row]
+		cell.textLabel?.text = objects[indexPath.row]
 		
 		if indexPath.row == 0 {
 			let greenColor = UIColor(red: 85.0/255.0, green: 213.0/255.0, blue: 80.0/255.0, alpha: 1.0)
