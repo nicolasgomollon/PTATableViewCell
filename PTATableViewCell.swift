@@ -534,7 +534,7 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 				return true
 			}
 		}
-		return true
+		return !editing
 	}
 	
 	func _pan(gesture: UIPanGestureRecognizer) {
