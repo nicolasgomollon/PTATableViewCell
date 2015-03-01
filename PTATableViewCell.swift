@@ -200,7 +200,7 @@ class PTATableViewCell: UITableViewCell {
 	}
 	
 	private func addSubviewToSlidingView(view: UIView) {
-		for subview in slidingView.subviews as Array<UIView> {
+		for subview in slidingView.subviews as! Array<UIView> {
 			subview.removeFromSuperview()
 		}
 		slidingView.addSubview(view)
