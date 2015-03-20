@@ -145,7 +145,7 @@ class PTATableViewCellStateAttributes {
 class PTATableViewCell: UITableViewCell {
 	
 	/** The object that acts as the delegate of the receiving table view cell. */
-	var delegate: PTATableViewCellDelegate!
+	weak var delegate: PTATableViewCellDelegate!
 	
 	private var panGestureRecognizer: UIPanGestureRecognizer!
 	
@@ -166,37 +166,37 @@ class PTATableViewCell: UITableViewCell {
 	
 	private var _slidingView: UIView?
 	private var slidingView: UIView! {
-	get {
-		if let slidingView = _slidingView {
-			return slidingView
+		get {
+			if let slidingView = _slidingView {
+				return slidingView
+			}
+			
+			_slidingView = UIView()
+			_slidingView!.contentMode = .Center
+			
+			return _slidingView
 		}
-		
-		_slidingView = UIView()
-		_slidingView!.contentMode = .Center
-		
-		return _slidingView
-	}
-	set {
-		_slidingView = newValue
-	}
+		set {
+			_slidingView = newValue
+		}
 	}
 	
 	private var _colorIndicatorView: UIView?
 	private var colorIndicatorView: UIView! {
-	get {
-		if let colorIndicatorView = _colorIndicatorView {
-			return colorIndicatorView
+		get {
+			if let colorIndicatorView = _colorIndicatorView {
+				return colorIndicatorView
+			}
+			
+			_colorIndicatorView = UIView(frame: bounds)
+			_colorIndicatorView!.autoresizingMask = (.FlexibleHeight | .FlexibleWidth)
+			_colorIndicatorView!.backgroundColor = defaultColor
+			
+			return _colorIndicatorView
 		}
-		
-		_colorIndicatorView = UIView(frame: bounds)
-		_colorIndicatorView!.autoresizingMask = (.FlexibleHeight | .FlexibleWidth)
-		_colorIndicatorView!.backgroundColor = defaultColor
-		
-		return _colorIndicatorView
-	}
-	set {
-		_colorIndicatorView = newValue
-	}
+		set {
+			_colorIndicatorView = newValue
+		}
 	}
 	
 	private func addSubviewToSlidingView(view: UIView) {
@@ -467,11 +467,11 @@ private extension PTATableViewCell {
 		
 		colorIndicatorView.backgroundColor = colorWith(percentage: percentage)
 		
-		UIView.animateWithDuration(duration, delay: 0.0, options: (.CurveEaseOut | .AllowUserInteraction), animations: {
+		UIView.animateWithDuration(duration, delay: 0.0, options: (.CurveEaseOut | .AllowUserInteraction), animations: { [unowned self] in
 				self.contentView.frame = frame
 				self.slidingView.alpha = 0.0
 				self.slideViewWith(percentage: self.percentageWith(offset: origin, relativeToWidth: CGRectGetWidth(self.bounds)), view: self.viewWith(percentage: percentage), andDragBehavior: self.viewBehaviorWith(percentage: percentage))
-			}, completion: { (completed: Bool) -> Void in
+			}, completion: { [unowned self] (completed: Bool) -> Void in
 				self.executeCompletionBlockWith(percentage: percentage)
 			})
 	}
@@ -481,7 +481,7 @@ private extension PTATableViewCell {
 		
 		let offset = offsetWith(percentage: percentage, relativeToWidth: CGRectGetWidth(bounds))
 		
-		UIView.animateWithDuration(0.3, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: offset / 100.0, options: (.CurveEaseOut | .AllowUserInteraction), animations: {
+		UIView.animateWithDuration(0.3, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: offset / 100.0, options: (.CurveEaseOut | .AllowUserInteraction), animations: { [unowned self] in
 				self.contentView.frame = self.contentView.bounds
 				self.colorIndicatorView.backgroundColor = self.defaultColor
 				self.slidingView.alpha = 0.0
@@ -492,7 +492,7 @@ private extension PTATableViewCell {
 				} else {
 					self.slideViewWith(percentage: 0.0, view: self.viewWith(percentage: percentage), andDragBehavior: .None)
 				}
-			}, completion: { (completed: Bool) -> Void in
+			}, completion: { [unowned self] (completed: Bool) -> Void in
 				self.removeSwipingView()
 			})
 	}
