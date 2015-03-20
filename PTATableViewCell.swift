@@ -240,7 +240,7 @@ private extension PTATableViewCell {
 	private func setupSwipingView() {
 		if _colorIndicatorView != nil { return }
 		colorIndicatorView.addSubview(slidingView)
-		insertSubview(colorIndicatorView, belowSubview: contentView)
+		insertSubview(colorIndicatorView, atIndex: 0)
 	}
 	
 	private func removeSwipingView() {
