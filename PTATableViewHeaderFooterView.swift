@@ -1,9 +1,9 @@
 //
-//  PTATableViewCell.swift
+//  PTATableViewHeaderFooterView.swift
 //  PTATableViewCell
 //
 //  Objective-C code Copyright (c) 2014 Ali Karagoz. All rights reserved.
-//  Swift adaptation Copyright (c) 2014 Nicolas Gomollon. All rights reserved.
+//  Swift adaptation Copyright (c) 2015 Nicolas Gomollon. All rights reserved.
 //
 
 import Foundation
@@ -11,35 +11,35 @@ import UIKit
 
 
 @objc
-public protocol ObjC_PTATableViewCellDelegate: NSObjectProtocol {
+public protocol ObjC_PTATableViewHeaderFooterViewDelegate: NSObjectProtocol {
 	
-	/** Asks the delegate whether a given cell should be swiped. Defaults to `true` if not implemented. */
-	optional func tableViewCellShouldSwipe(cell: PTATableViewCell) -> Bool
+	/** Asks the delegate whether a given header/footer view should be swiped. Defaults to `true` if not implemented. */
+	optional func tableViewHeaderFooterViewShouldSwipe(view: PTATableViewHeaderFooterView) -> Bool
 	
-	/** Tells the delegate that the specified cell is being swiped with a percentage. */
-	optional func tableViewCellIsSwiping(cell: PTATableViewCell, withPercentage percentage: Double)
+	/** Tells the delegate that the specified header/footer view is being swiped with a percentage. */
+	optional func tableViewHeaderFooterViewIsSwiping(view: PTATableViewHeaderFooterView, withPercentage percentage: Double)
 	
-	/** Tells the delegate that the specified cell started swiping. */
-	optional func tableViewCellDidStartSwiping(cell: PTATableViewCell)
+	/** Tells the delegate that the specified header/footer view started swiping. */
+	optional func tableViewHeaderFooterViewDidStartSwiping(view: PTATableViewHeaderFooterView)
 	
-	/** Tells the delegate that the specified cell ended swiping. */
-	optional func tableViewCellDidEndSwiping(cell: PTATableViewCell)
+	/** Tells the delegate that the specified header/footer view ended swiping. */
+	optional func tableViewHeaderFooterViewDidEndSwiping(view: PTATableViewHeaderFooterView)
 	
 }
 
-/** The delegate of a PTATableViewCell object must adopt the PTATableViewCellDelegate protocol in order to perform an action when triggered. Optional methods of the protocol allow the delegate to be notified of a cell’s swipe state, and determine whether a cell should be swiped. */
-public protocol PTATableViewCellDelegate: ObjC_PTATableViewCellDelegate {
+/** The delegate of a PTATableViewHeaderFooterView object must adopt the PTATableViewHeaderFooterViewDelegate protocol in order to perform an action when triggered. Optional methods of the protocol allow the delegate to be notified of a header/footer view’s swipe state, and determine whether a header/footer view should be swiped. */
+public protocol PTATableViewHeaderFooterViewDelegate: ObjC_PTATableViewHeaderFooterViewDelegate {
 	
 	/** Tells the delegate that the specified cell’s state was triggered. */
-	func tableViewCell(cell: PTATableViewCell, didTriggerState state: PTATableViewItemState, withMode mode: PTATableViewItemMode)
+	func tableViewHeaderFooterView(view: PTATableViewHeaderFooterView, didTriggerState state: PTATableViewItemState, withMode mode: PTATableViewItemMode)
 	
 }
 
 
-public class PTATableViewCell: UITableViewCell {
+public class PTATableViewHeaderFooterView: UITableViewHeaderFooterView {
 	
-	/** The object that acts as the delegate of the receiving table view cell. */
-	public weak var delegate: PTATableViewCellDelegate!
+	/** The object that acts as the delegate of the receiving table view header/footer view. */
+	public weak var delegate: PTATableViewHeaderFooterViewDelegate!
 	
 	private var panGestureRecognizer: UIPanGestureRecognizer!
 	
@@ -51,10 +51,10 @@ public class PTATableViewCell: UITableViewCell {
 	/** The color that’s revealed before an action is triggered. Defaults to a light gray color. */
 	public var defaultColor = UIColor(red: 227.0/255.0, green: 227.0/255.0, blue: 227.0/255.0, alpha: 1.0)
 	
-	/** The attributes used when swiping the cell from left to right. */
+	/** The attributes used when swiping the header/footer view from left to right. */
 	public var leftToRightAttr = PTATableViewItemStateAttributes()
 	
-	/** The attributes used when swiping the cell from right to left. */
+	/** The attributes used when swiping the header/footer view from right to left. */
 	public var rightToLeftAttr = PTATableViewItemStateAttributes()
 	
 	
@@ -101,8 +101,12 @@ public class PTATableViewCell: UITableViewCell {
 	}
 	
 	
-	public override init(style: UITableViewCellStyle, reuseIdentifier: String!) {
-		super.init(style: style, reuseIdentifier: reuseIdentifier)
+	public override init(reuseIdentifier: String?) {
+		super.init(reuseIdentifier: reuseIdentifier)
+	}
+	
+	public override init(frame: CGRect) {
+		super.init(frame: frame)
 		initialize()
 	}
 	
@@ -129,12 +133,13 @@ public class PTATableViewCell: UITableViewCell {
 	
 }
 
-private extension PTATableViewCell {
+private extension PTATableViewHeaderFooterView {
 	
 	private func setupSwipingView() {
 		if _colorIndicatorView != nil { return }
 		colorIndicatorView.addSubview(slidingView)
-		insertSubview(colorIndicatorView, atIndex: 0)
+		// TODO: Check this out on iOS 7.
+		insertSubview(colorIndicatorView, belowSubview: contentView)
 	}
 	
 	private func removeSwipingView() {
@@ -149,7 +154,7 @@ private extension PTATableViewCell {
 	
 }
 
-private extension PTATableViewCell {
+private extension PTATableViewHeaderFooterView {
 	
 	private func animationDurationWith(#velocity: CGPoint) -> NSTimeInterval {
 		let DurationHighLimit = 0.1
@@ -215,7 +220,7 @@ private extension PTATableViewCell {
 	
 }
 
-private extension PTATableViewCell {
+private extension PTATableViewHeaderFooterView {
 	
 	private func animateWith(#offset: Double) {
 		let percentage = PTATableViewItemHelper.percentageWith(offset: offset, relativeToWidth: Double(CGRectGetWidth(bounds)))
@@ -313,9 +318,9 @@ private extension PTATableViewCell {
 		colorIndicatorView.backgroundColor = colorWith(percentage: percentage)
 		
 		UIView.animateWithDuration(duration, delay: 0.0, options: (.CurveEaseOut | .AllowUserInteraction), animations: { [unowned self] in
-				self.contentView.frame = frame
-				self.slidingView.alpha = 0.0
-				self.slideViewWith(percentage: PTATableViewItemHelper.percentageWith(offset: Double(origin), relativeToWidth: Double(CGRectGetWidth(self.bounds))), view: self.viewWith(percentage: percentage), andDragBehavior: self.viewBehaviorWith(percentage: percentage))
+			self.contentView.frame = frame
+			self.slidingView.alpha = 0.0
+			self.slideViewWith(percentage: PTATableViewItemHelper.percentageWith(offset: Double(origin), relativeToWidth: Double(CGRectGetWidth(self.bounds))), view: self.viewWith(percentage: percentage), andDragBehavior: self.viewBehaviorWith(percentage: percentage))
 			}, completion: { [unowned self] (completed: Bool) -> Void in
 				self.executeCompletionBlockWith(percentage: percentage)
 			})
@@ -327,16 +332,16 @@ private extension PTATableViewCell {
 		let offset = PTATableViewItemHelper.offsetWith(percentage: percentage, relativeToWidth: CGRectGetWidth(bounds))
 		
 		UIView.animateWithDuration(0.3, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: offset / 100.0, options: (.CurveEaseOut | .AllowUserInteraction), animations: { [unowned self] in
-				self.contentView.frame = self.contentView.bounds
-				self.colorIndicatorView.backgroundColor = self.defaultColor
-				self.slidingView.alpha = 0.0
-				if ((self.stateWith(percentage: percentage) == .None) ||
-					((self.direction == .LeftToRight) && (self.leftToRightAttr.viewBehavior == .StickThenDragWithPan)) ||
-					((self.direction == .RightToLeft) && (self.rightToLeftAttr.viewBehavior == .StickThenDragWithPan))) {
-						self.slideViewWith(percentage: 0.0, view: self.viewWith(percentage: percentage), andDragBehavior: self.viewBehaviorWith(percentage: percentage))
-				} else {
-					self.slideViewWith(percentage: 0.0, view: self.viewWith(percentage: percentage), andDragBehavior: .None)
-				}
+			self.contentView.frame = self.contentView.bounds
+			self.colorIndicatorView.backgroundColor = self.defaultColor
+			self.slidingView.alpha = 0.0
+			if ((self.stateWith(percentage: percentage) == .None) ||
+				((self.direction == .LeftToRight) && (self.leftToRightAttr.viewBehavior == .StickThenDragWithPan)) ||
+				((self.direction == .RightToLeft) && (self.rightToLeftAttr.viewBehavior == .StickThenDragWithPan))) {
+					self.slideViewWith(percentage: 0.0, view: self.viewWith(percentage: percentage), andDragBehavior: self.viewBehaviorWith(percentage: percentage))
+			} else {
+				self.slideViewWith(percentage: 0.0, view: self.viewWith(percentage: percentage), andDragBehavior: .None)
+			}
 			}, completion: { [unowned self] (completed: Bool) -> Void in
 				self.removeSwipingView()
 			})
@@ -355,12 +360,12 @@ private extension PTATableViewCell {
 			mode = .None
 		}
 		
-		delegate?.tableViewCell(self, didTriggerState: state, withMode: mode)
+		delegate?.tableViewHeaderFooterView(self, didTriggerState: state, withMode: mode)
 	}
 	
 }
 
-extension PTATableViewCell: UIGestureRecognizerDelegate {
+extension PTATableViewHeaderFooterView: UIGestureRecognizerDelegate {
 	
 	public override func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
 		if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
@@ -375,17 +380,17 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 					return false
 				}
 				
-				delegate?.tableViewCellDidStartSwiping?(self)
+				delegate?.tableViewHeaderFooterViewDidStartSwiping?(self)
 				return true
 			} else {
 				return false
 			}
 		}
-		return !editing
+		return true
 	}
 	
 	internal func _pan(gesture: UIPanGestureRecognizer) {
-		if let shouldSwipe = delegate?.tableViewCellShouldSwipe?(self) {
+		if let shouldSwipe = delegate?.tableViewHeaderFooterViewShouldSwipe?(self) {
 			if !shouldSwipe { return }
 		}
 		pan(gestureState: gesture.state, translation: gesture.translationInView(self), velocity: gesture.velocityInView(self))
@@ -412,7 +417,7 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 			}
 			slideViewWith(percentage: percentage)
 			
-			delegate?.tableViewCellIsSwiping?(self, withPercentage: percentage)
+			delegate?.tableViewHeaderFooterViewIsSwiping?(self, withPercentage: percentage)
 		} else if (gestureState == .Ended) || (gestureState == .Cancelled) {
 			let cellState = stateWith(percentage: percentage)
 			var cellMode: PTATableViewItemMode = .None
@@ -429,7 +434,7 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 				swipeToOriginWith(percentage: percentage)
 			}
 			
-			delegate?.tableViewCellDidEndSwiping?(self)
+			delegate?.tableViewHeaderFooterViewDidEndSwiping?(self)
 		}
 	}
 	
@@ -453,27 +458,27 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 	
 }
 
-public extension PTATableViewCell {
+public extension PTATableViewHeaderFooterView {
 	
-	/** Sets a pan gesture for the specified state and mode. Don’t forget to implement the delegate method `tableViewCell(cell:didTriggerState:withMode:)` to perform an action when the cell’s state is triggered. */
+	/** Sets a pan gesture for the specified state and mode. Don’t forget to implement the delegate method `tableViewHeaderFooterView(view:didTriggerState:withMode:)` to perform an action when the header/footer view’s state is triggered. */
 	public func setPanGesture(state: PTATableViewItemState, mode: PTATableViewItemMode, color: UIColor?, view: UIView?) {
-			stateOptions = stateOptions | state
+		stateOptions = stateOptions | state
+		
+		if state & .LeftToRight {
+			leftToRightAttr = PTATableViewItemStateAttributes(mode: mode, color: color, view: view)
 			
-			if state & .LeftToRight {
-				leftToRightAttr = PTATableViewItemStateAttributes(mode: mode, color: color, view: view)
-				
-				if mode == .None {
-					stateOptions = stateOptions & ~PTATableViewItemState.LeftToRight
-				}
+			if mode == .None {
+				stateOptions = stateOptions & ~PTATableViewItemState.LeftToRight
 			}
+		}
+		
+		if state & .RightToLeft {
+			rightToLeftAttr = PTATableViewItemStateAttributes(mode: mode, color: color, view: view)
 			
-			if state & .RightToLeft {
-				rightToLeftAttr = PTATableViewItemStateAttributes(mode: mode, color: color, view: view)
-				
-				if mode == .None {
-					stateOptions = stateOptions & ~PTATableViewItemState.RightToLeft
-				}
+			if mode == .None {
+				stateOptions = stateOptions & ~PTATableViewItemState.RightToLeft
 			}
+		}
 	}
 	
 }

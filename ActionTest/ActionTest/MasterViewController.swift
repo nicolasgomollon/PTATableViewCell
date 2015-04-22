@@ -53,7 +53,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 	}
 	
 	override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-		let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as PTATableViewCell
+		let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! PTATableViewCell
 		
 		cell.delegate = self
 		cell.textLabel?.text = objects[indexPath.row]
@@ -87,7 +87,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 	
 	// MARK: - Pan Trigger Action (Required)
 	
-	func tableViewCell(cell: PTATableViewCell, didTriggerState state: PTATableViewCellState, withMode mode: PTATableViewCellMode) {
+	func tableViewCell(cell: PTATableViewCell, didTriggerState state: PTATableViewItemState, withMode mode: PTATableViewItemMode) {
 		if let indexPath = tableView.indexPathForCell(cell) {
 			switch mode {
 			case .Switch:

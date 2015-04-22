@@ -12,6 +12,8 @@
 		DABA330319526EAD003A3309 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DABA330119526EAD003A3309 /* Main.storyboard */; };
 		DABA330519526EAD003A3309 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DABA330419526EAD003A3309 /* Images.xcassets */; };
 		DABA331F19526F70003A3309 /* PTATableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABA331E19526F70003A3309 /* PTATableViewCell.swift */; };
+		DAE2D6261AE7324100390C47 /* PTATableViewHeaderFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE2D6241AE7324100390C47 /* PTATableViewHeaderFooterView.swift */; };
+		DAE2D6271AE7324100390C47 /* PTATableViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE2D6251AE7324100390C47 /* PTATableViewItem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +24,8 @@
 		DABA330219526EAD003A3309 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		DABA330419526EAD003A3309 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		DABA331E19526F70003A3309 /* PTATableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PTATableViewCell.swift; path = ../PTATableViewCell.swift; sourceTree = "<group>"; };
+		DAE2D6241AE7324100390C47 /* PTATableViewHeaderFooterView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PTATableViewHeaderFooterView.swift; path = ../PTATableViewHeaderFooterView.swift; sourceTree = "<group>"; };
+		DAE2D6251AE7324100390C47 /* PTATableViewItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PTATableViewItem.swift; path = ../PTATableViewItem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,7 +42,9 @@
 		DABA32ED19526EAC003A3309 = {
 			isa = PBXGroup;
 			children = (
+				DAE2D6251AE7324100390C47 /* PTATableViewItem.swift */,
 				DABA331E19526F70003A3309 /* PTATableViewCell.swift */,
+				DAE2D6241AE7324100390C47 /* PTATableViewHeaderFooterView.swift */,
 				DABA32F819526EAC003A3309 /* ActionTest */,
 				DABA32F719526EAC003A3309 /* Products */,
 			);
@@ -141,8 +147,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DAE2D6261AE7324100390C47 /* PTATableViewHeaderFooterView.swift in Sources */,
 				DABA331F19526F70003A3309 /* PTATableViewCell.swift in Sources */,
 				DABA32FE19526EAC003A3309 /* MasterViewController.swift in Sources */,
+				DAE2D6271AE7324100390C47 /* PTATableViewItem.swift in Sources */,
 				DABA32FC19526EAC003A3309 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -279,6 +287,7 @@
 				DABA331619526EAD003A3309 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
