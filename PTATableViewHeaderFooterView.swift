@@ -41,6 +41,8 @@ public class PTATableViewHeaderFooterView: UITableViewHeaderFooterView {
 	/** The object that acts as the delegate of the receiving table view header/footer view. */
 	public weak var delegate: PTATableViewHeaderFooterViewDelegate!
 	
+	private var initialized: Bool = false
+	
 	private var panGestureRecognizer: UIPanGestureRecognizer!
 	
 	private var direction: PTATableViewItemState = .None
@@ -103,6 +105,7 @@ public class PTATableViewHeaderFooterView: UITableViewHeaderFooterView {
 	
 	public override init(reuseIdentifier: String?) {
 		super.init(reuseIdentifier: reuseIdentifier)
+		initialize()
 	}
 	
 	public override init(frame: CGRect) {
@@ -116,6 +119,9 @@ public class PTATableViewHeaderFooterView: UITableViewHeaderFooterView {
 	}
 	
 	private func initialize() {
+		if initialized { return }
+		initialized = true
+		
 		contentView.backgroundColor = .whiteColor()
 		panGestureRecognizer = UIPanGestureRecognizer(target: self, action: "_pan:")
 		panGestureRecognizer.delegate = self
