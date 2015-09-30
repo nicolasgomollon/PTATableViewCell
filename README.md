@@ -40,10 +40,10 @@ func tableViewCell(cell: PTATableViewCell, didTriggerState state: PTATableViewCe
 	if let indexPath = tableView.indexPathForCell(cell) {
 		switch mode {
 		case .Switch:
-			println("row \(indexPath.row)'s switch was triggered")
+			print("row \(indexPath.row)'s switch was triggered")
 			// Do something interesting here.
 		case .Exit:
-			println("row \(indexPath.row)'s exit was triggered")
+			print("row \(indexPath.row)'s exit was triggered")
 			// Do something interesting here.
 			objects.removeAtIndex(indexPath.row)
 			tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
@@ -75,7 +75,7 @@ See the ActionTest demo project included in this repository for a working exampl
 
 ## Requirements
 
-Since PTATableViewCell is written in Swift, it requires Xcode 6 or above and works on iOS 7 and above.
+Since PTATableViewCell is written in Swift 2, it requires Xcode 7 or above and works on iOS 7 and above.
 
 
 ## License

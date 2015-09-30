@@ -83,7 +83,7 @@ public class PTATableViewCell: UITableViewCell {
 			}
 			
 			_colorIndicatorView = UIView(frame: bounds)
-			_colorIndicatorView!.autoresizingMask = (.FlexibleHeight | .FlexibleWidth)
+			_colorIndicatorView!.autoresizingMask = ([.FlexibleHeight, .FlexibleWidth])
 			_colorIndicatorView!.backgroundColor = defaultColor
 			
 			return _colorIndicatorView
@@ -94,7 +94,7 @@ public class PTATableViewCell: UITableViewCell {
 	}
 	
 	private func addSubviewToSlidingView(view: UIView) {
-		for subview in slidingView.subviews as! Array<UIView> {
+		for subview in slidingView.subviews {
 			subview.removeFromSuperview()
 		}
 		slidingView.addSubview(view)
@@ -106,7 +106,7 @@ public class PTATableViewCell: UITableViewCell {
 		initialize()
 	}
 	
-	public required init(coder aDecoder: NSCoder) {
+	public required init?(coder aDecoder: NSCoder) {
 		super.init(coder: aDecoder)
 		initialize()
 	}
@@ -151,7 +151,7 @@ private extension PTATableViewCell {
 
 private extension PTATableViewCell {
 	
-	private func animationDurationWith(#velocity: CGPoint) -> NSTimeInterval {
+	private func animationDurationWith(velocity velocity: CGPoint) -> NSTimeInterval {
 		let DurationHighLimit = 0.1
 		let DurationLowLimit = 0.25
 		
@@ -168,7 +168,7 @@ private extension PTATableViewCell {
 		return (DurationHighLimit + DurationLowLimit) - abs(Double(horizontalVelocity / width) * animationDurationDiff)
 	}
 	
-	private func viewWith(#percentage: Double) -> UIView? {
+	private func viewWith(percentage percentage: Double) -> UIView? {
 		if percentage < 0.0 {
 			return rightToLeftAttr.view
 		} else if percentage > 0.0 {
@@ -177,7 +177,7 @@ private extension PTATableViewCell {
 		return nil
 	}
 	
-	private func viewBehaviorWith(#percentage: Double) -> PTATableViewItemSlidingViewBehavior {
+	private func viewBehaviorWith(percentage percentage: Double) -> PTATableViewItemSlidingViewBehavior {
 		if (PTATableViewItemHelper.directionWith(percentage: percentage) == .LeftToRight) && (leftToRightAttr.mode != .None) {
 			return leftToRightAttr.viewBehavior
 		} else if (PTATableViewItemHelper.directionWith(percentage: percentage) == .RightToLeft) && (rightToLeftAttr.mode != .None) {
@@ -186,7 +186,7 @@ private extension PTATableViewCell {
 		return .None
 	}
 	
-	private func alphaWith(#percentage: Double) -> CGFloat {
+	private func alphaWith(percentage percentage: Double) -> CGFloat {
 		if (percentage > 0.0) && (percentage < leftToRightAttr.triggerPercentage) {
 			return CGFloat(percentage / leftToRightAttr.triggerPercentage)
 		} else if (percentage < 0.0) && (percentage > -rightToLeftAttr.triggerPercentage) {
@@ -195,7 +195,7 @@ private extension PTATableViewCell {
 		return 1.0
 	}
 	
-	private func colorWith(#percentage: Double) -> UIColor {
+	private func colorWith(percentage percentage: Double) -> UIColor {
 		if (percentage >= leftToRightAttr.triggerPercentage) && (leftToRightAttr.mode != .None) && (leftToRightAttr.color != nil) {
 			return leftToRightAttr.color!
 		} else if (percentage <= -rightToLeftAttr.triggerPercentage) && (rightToLeftAttr.mode != .None) && (rightToLeftAttr.color != nil) {
@@ -204,7 +204,7 @@ private extension PTATableViewCell {
 		return defaultColor
 	}
 	
-	private func stateWith(#percentage: Double) -> PTATableViewItemState {
+	private func stateWith(percentage percentage: Double) -> PTATableViewItemState {
 		if (percentage >= leftToRightAttr.triggerPercentage) && (leftToRightAttr.mode != .None) {
 			return .LeftToRight
 		} else if (percentage <= -rightToLeftAttr.triggerPercentage) && (rightToLeftAttr.mode != .None) {
@@ -217,7 +217,7 @@ private extension PTATableViewCell {
 
 private extension PTATableViewCell {
 	
-	private func animateWith(#offset: Double) {
+	private func animateWith(offset offset: Double) {
 		let percentage = PTATableViewItemHelper.percentageWith(offset: offset, relativeToWidth: Double(CGRectGetWidth(bounds)))
 		
 		if let view = viewWith(percentage: percentage) {
@@ -229,11 +229,11 @@ private extension PTATableViewCell {
 		colorIndicatorView.backgroundColor = colorWith(percentage: percentage)
 	}
 	
-	private func slideViewWith(#percentage: Double) {
+	private func slideViewWith(percentage percentage: Double) {
 		slideViewWith(percentage: percentage, view: viewWith(percentage: percentage), andDragBehavior: viewBehaviorWith(percentage: percentage))
 	}
 	
-	private func slideViewWith(#percentage: Double, view: UIView?, andDragBehavior dragBehavior: PTATableViewItemSlidingViewBehavior) {
+	private func slideViewWith(percentage percentage: Double, view: UIView?, andDragBehavior dragBehavior: PTATableViewItemSlidingViewBehavior) {
 		var position = CGPointZero
 		position.y = CGRectGetHeight(bounds) / 2.0
 		
@@ -289,7 +289,7 @@ private extension PTATableViewCell {
 			
 		}
 		
-		if var activeView = view {
+		if let activeView = view {
 			var activeViewFrame = activeView.bounds
 			activeViewFrame.origin.x = position.x - (activeViewFrame.size.width / 2.0)
 			activeViewFrame.origin.y = position.y - (activeViewFrame.size.height / 2.0)
@@ -298,7 +298,7 @@ private extension PTATableViewCell {
 		}
 	}
 	
-	private func moveWith(#percentage: Double, duration: NSTimeInterval, direction: PTATableViewItemState) {
+	private func moveWith(percentage percentage: Double, duration: NSTimeInterval, direction: PTATableViewItemState) {
 		var origin: CGFloat = 0.0
 		
 		if direction == .RightToLeft {
@@ -312,7 +312,7 @@ private extension PTATableViewCell {
 		
 		colorIndicatorView.backgroundColor = colorWith(percentage: percentage)
 		
-		UIView.animateWithDuration(duration, delay: 0.0, options: (.CurveEaseOut | .AllowUserInteraction), animations: { [unowned self] in
+		UIView.animateWithDuration(duration, delay: 0.0, options: ([.CurveEaseOut, .AllowUserInteraction]), animations: { [unowned self] in
 				self.contentView.frame = frame
 				self.slidingView.alpha = 0.0
 				self.slideViewWith(percentage: PTATableViewItemHelper.percentageWith(offset: Double(origin), relativeToWidth: Double(CGRectGetWidth(self.bounds))), view: self.viewWith(percentage: percentage), andDragBehavior: self.viewBehaviorWith(percentage: percentage))
@@ -321,12 +321,12 @@ private extension PTATableViewCell {
 			})
 	}
 	
-	private func swipeToOriginWith(#percentage: Double) {
+	private func swipeToOriginWith(percentage percentage: Double) {
 		executeCompletionBlockWith(percentage: percentage)
 		
 		let offset = PTATableViewItemHelper.offsetWith(percentage: percentage, relativeToWidth: CGRectGetWidth(bounds))
 		
-		UIView.animateWithDuration(0.3, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: offset / 100.0, options: (.CurveEaseOut | .AllowUserInteraction), animations: { [unowned self] in
+		UIView.animateWithDuration(0.3, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: offset / 100.0, options: ([.CurveEaseOut, .AllowUserInteraction]), animations: { [unowned self] in
 				self.contentView.frame = self.contentView.bounds
 				self.colorIndicatorView.backgroundColor = self.defaultColor
 				self.slidingView.alpha = 0.0
@@ -342,7 +342,7 @@ private extension PTATableViewCell {
 			})
 	}
 	
-	private func executeCompletionBlockWith(#percentage: Double) {
+	private func executeCompletionBlockWith(percentage percentage: Double) {
 		let state = stateWith(percentage: percentage)
 		var mode: PTATableViewItemMode = .None
 		
@@ -360,18 +360,18 @@ private extension PTATableViewCell {
 	
 }
 
-extension PTATableViewCell: UIGestureRecognizerDelegate {
+extension PTATableViewCell {
 	
 	public override func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
 		if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
 			let point = panGestureRecognizer.velocityInView(self)
 			if abs(point.x) > abs(point.y) {
 				
-				if (point.x < 0.0) && !(stateOptions & .RightToLeft) {
+				if (point.x < 0.0) && !stateOptions.contains(.RightToLeft) {
 					return false
 				}
 				
-				if (point.x > 0.0) && !(stateOptions & .LeftToRight) {
+				if (point.x > 0.0) && !stateOptions.contains(.LeftToRight) {
 					return false
 				}
 				
@@ -391,13 +391,13 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 		pan(gestureState: gesture.state, translation: gesture.translationInView(self), velocity: gesture.velocityInView(self))
 	}
 	
-	public func pan(#gestureState: UIGestureRecognizerState, translation: CGPoint) {
+	public func pan(gestureState gestureState: UIGestureRecognizerState, translation: CGPoint) {
 		pan(gestureState: gestureState, translation: translation, velocity: CGPointZero)
 	}
 	
-	public func pan(#gestureState: UIGestureRecognizerState, translation: CGPoint, velocity: CGPoint) {
+	public func pan(gestureState gestureState: UIGestureRecognizerState, translation: CGPoint, velocity: CGPoint) {
 		let actualTranslation = actualizeTranslation(translation)
-		var percentage = PTATableViewItemHelper.percentageWith(offset: Double(actualTranslation.x), relativeToWidth: Double(CGRectGetWidth(bounds)))
+		let percentage = PTATableViewItemHelper.percentageWith(offset: Double(actualTranslation.x), relativeToWidth: Double(CGRectGetWidth(bounds)))
 		direction = PTATableViewItemHelper.directionWith(percentage: percentage)
 		
 		if (gestureState == .Began) || (gestureState == .Changed) {
@@ -423,7 +423,7 @@ extension PTATableViewCell: UIGestureRecognizerDelegate {
 				cellMode = rightToLeftAttr.mode
 			}
 			
-			if (cellMode == .Exit) && !(direction & .None) {
+			if (cellMode == .Exit) && (direction != .None) {
 				moveWith(percentage: percentage, duration: animationDurationWith(velocity: velocity), direction: cellState)
 			} else {
 				swipeToOriginWith(percentage: percentage)
@@ -457,21 +457,21 @@ public extension PTATableViewCell {
 	
 	/** Sets a pan gesture for the specified state and mode. Don’t forget to implement the delegate method `tableViewCell(cell:didTriggerState:withMode:)` to perform an action when the cell’s state is triggered. */
 	public func setPanGesture(state: PTATableViewItemState, mode: PTATableViewItemMode, color: UIColor?, view: UIView?) {
-			stateOptions = stateOptions | state
+			stateOptions.insert(state)
 			
-			if state & .LeftToRight {
+			if state.contains(.LeftToRight) {
 				leftToRightAttr = PTATableViewItemStateAttributes(mode: mode, color: color, view: view)
 				
 				if mode == .None {
-					stateOptions = stateOptions & ~PTATableViewItemState.LeftToRight
+					stateOptions.remove(.LeftToRight)
 				}
 			}
 			
-			if state & .RightToLeft {
+			if state.contains(.RightToLeft) {
 				rightToLeftAttr = PTATableViewItemStateAttributes(mode: mode, color: color, view: view)
 				
 				if mode == .None {
-					stateOptions = stateOptions & ~PTATableViewItemState.RightToLeft
+					stateOptions.remove(.RightToLeft)
 				}
 			}
 	}

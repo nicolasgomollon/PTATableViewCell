@@ -42,7 +42,7 @@ public enum PTATableViewItemSlidingViewBehavior {
 
 
 /** Describes the state that has been triggered by the user. */
-public struct PTATableViewItemState: RawOptionSetType, BooleanType {
+public struct PTATableViewItemState: OptionSetType, BooleanType {
 	private var value: UInt = 0
 	
 	public init(_ rawValue: UInt) { self.value = rawValue }
@@ -52,28 +52,28 @@ public struct PTATableViewItemState: RawOptionSetType, BooleanType {
 	
 	// MARK: NilLiteralConvertible
 	public init(nilLiteral: ()) { self.value = 0}
-	public static func convertFromNilLiteral() -> PTATableViewItemState { return self(0) }
+	public static func convertFromNilLiteral() -> PTATableViewItemState { return self.init(0) }
 	
 	// MARK: RawRepresentable
 	public var rawValue: UInt { return self.value }
 	public func toRaw() -> UInt { return self.value }
-	public static func fromRaw(raw: UInt) -> PTATableViewItemState? { return self(raw) }
+	public static func fromRaw(raw: UInt) -> PTATableViewItemState? { return self.init(raw) }
 	
 	// MARK: BooleanType
 	public var boolValue: Bool { return self.value != 0 }
 	
 	// MARK: BitwiseOperationsType
-	public static var allZeros: PTATableViewItemState { return self(0) }
-	public static func fromMask(raw: UInt) -> PTATableViewItemState { return self(raw) }
+	public static var allZeros: PTATableViewItemState { return self.init(0) }
+	public static func fromMask(raw: UInt) -> PTATableViewItemState { return self.init(raw) }
 	
 	/** No state has been triggered. */
-	public static var None: PTATableViewItemState			{ return self(0) }
+	public static var None: PTATableViewItemState			{ return self.init(0) }
 	
 	/** The state triggered during a left-to-right swipe. */
-	public static var LeftToRight: PTATableViewItemState	{ return self(1 << 0) }
+	public static var LeftToRight: PTATableViewItemState	{ return self.init(1 << 0) }
 	
 	/** The state triggered during a right-to-left swipe. */
-	public static var RightToLeft: PTATableViewItemState	{ return self(1 << 1) }
+	public static var RightToLeft: PTATableViewItemState	{ return self.init(1 << 1) }
 }
 
 public func == (left: PTATableViewItemState, right: PTATableViewItemState) -> Bool { return left.value == right.value }
@@ -118,7 +118,7 @@ public class PTATableViewItemStateAttributes {
 
 public class PTATableViewItemHelper: NSObject {
 	
-	public class func offsetWith(#percentage: Double, relativeToWidth w: CGFloat) -> CGFloat {
+	public class func offsetWith(percentage percentage: Double, relativeToWidth w: CGFloat) -> CGFloat {
 		let width = Double(w)
 		var offset = percentage * width
 		
@@ -131,7 +131,7 @@ public class PTATableViewItemHelper: NSObject {
 		return CGFloat(offset)
 	}
 	
-	public class func percentageWith(#offset: Double, relativeToWidth width: Double) -> Double {
+	public class func percentageWith(offset offset: Double, relativeToWidth width: Double) -> Double {
 		var percentage = offset / width
 		
 		if percentage < -1.0 {
@@ -143,7 +143,7 @@ public class PTATableViewItemHelper: NSObject {
 		return percentage
 	}
 	
-	public class func directionWith(#percentage: Double) -> PTATableViewItemState {
+	public class func directionWith(percentage percentage: Double) -> PTATableViewItemState {
 		if percentage < 0.0 {
 			return .RightToLeft
 		} else if percentage > 0.0 {

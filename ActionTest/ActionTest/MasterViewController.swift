@@ -36,8 +36,8 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
 	}
 	
-	func viewWithImage(#named: String) -> UIView {
-		var imageView = UIImageView(image: UIImage(named: named))
+	func viewWithImage(named named: String) -> UIView {
+		let imageView = UIImageView(image: UIImage(named: named))
 		imageView.contentMode = .Center
 		return imageView
 	}
@@ -61,7 +61,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		if indexPath.row == 0 {
 			let greenColor = UIColor(red: 85.0/255.0, green: 213.0/255.0, blue: 80.0/255.0, alpha: 1.0)
 			
-			cell.setPanGesture(.LeftToRight | .RightToLeft, mode: .Switch, color: view.tintColor, view: viewWithImage(named: "check"))
+			cell.setPanGesture([.LeftToRight, .RightToLeft], mode: .Switch, color: view.tintColor, view: viewWithImage(named: "check"))
 			
 			cell.leftToRightAttr.viewBehavior = .DragWithPanThenStick
 			cell.leftToRightAttr.color = greenColor
@@ -91,9 +91,9 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		if let indexPath = tableView.indexPathForCell(cell) {
 			switch mode {
 			case .Switch:
-				println("row \(indexPath.row)'s switch was triggered")
+				print("row \(indexPath.row)'s switch was triggered")
 			case .Exit:
-				println("row \(indexPath.row)'s exit was triggered")
+				print("row \(indexPath.row)'s exit was triggered")
 				objects.removeAtIndex(indexPath.row)
 				tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
 			default:
@@ -106,19 +106,19 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 	
 	func tableViewCellDidStartSwiping(cell: PTATableViewCell) {
 		if let indexPath = tableView.indexPathForCell(cell) {
-			println("row \(indexPath.row) started swiping")
+			print("row \(indexPath.row) started swiping")
 		}
 	}
 	
 	func tableViewCellIsSwiping(cell: PTATableViewCell, withPercentage percentage: Double) {
 		if let indexPath = tableView.indexPathForCell(cell) {
-			println("row \(indexPath.row) is being swiped with percentage: \(percentage * 100.0)")
+			print("row \(indexPath.row) is being swiped with percentage: \(percentage * 100.0)")
 		}
 	}
 	
 	func tableViewCellDidEndSwiping(cell: PTATableViewCell) {
 		if let indexPath = tableView.indexPathForCell(cell) {
-			println("row \(indexPath.row) ended swiping")
+			print("row \(indexPath.row) ended swiping")
 		}
 	}
 	
