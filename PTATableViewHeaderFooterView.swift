@@ -118,7 +118,7 @@ public class PTATableViewHeaderFooterView: UITableViewHeaderFooterView {
 		initialized = true
 		
 		contentView.backgroundColor = .whiteColor()
-		panGestureRecognizer = UIPanGestureRecognizer(target: self, action: "_pan:")
+		panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(PTATableViewHeaderFooterView._pan(_:)))
 		panGestureRecognizer.delegate = self
 		addGestureRecognizer(panGestureRecognizer)
 	}

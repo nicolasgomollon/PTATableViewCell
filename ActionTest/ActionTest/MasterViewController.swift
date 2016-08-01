@@ -22,7 +22,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		super.viewDidLoad()
 		
 		// Do any additional setup after loading the view, typically from a nib.
-		navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "insertNewObject:")
+		navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: #selector(MasterViewController.insertNewObject(_:)))
 	}
 	
 	override func didReceiveMemoryWarning() {
