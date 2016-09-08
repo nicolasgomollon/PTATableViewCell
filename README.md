@@ -10,23 +10,23 @@ PTATableViewCell (PTA is short for “Pan to Trigger Action”) is a convenient 
 Here’s an example usage, with various attributes modified to show a few of the cell’s properties.
 
 ```swift
-override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-	let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as PTATableViewCell
+override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+	let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! PTATableViewCell
 	
 	cell.textLabel.text = objects[indexPath.row]
 	
 
 	cell.delegate = self
 
-	cell.setPanGesture(.LeftToRight, mode: .Switch, color: view.tintColor, view: viewWithImage(named: "check"))
-	cell.leftToRightAttr.viewBehavior = .DragWithPanThenStick
+	cell.setPanGesture(.leftToRight, mode: .switch, color: view.tintColor, view: viewWithImage(named: "check"))
+	cell.leftToRightAttr.viewBehavior = .dragWithPanThenStick
 	
 	let redColor = UIColor(red: 232.0/255.0, green: 61.0/255.0, blue: 14.0/255.0, alpha: 1.0)
-	cell.setPanGesture(.RightToLeft, mode: .Exit, color: redColor, view: viewWithImage(named: "cross"))
+	cell.setPanGesture(.rightToLeft, mode: .exit, color: redColor, view: viewWithImage(named: "cross"))
 	
 	cell.rightToLeftAttr.triggerPercentage = 0.4
 	cell.rightToLeftAttr.rubberbandBounce = false
-	cell.rightToLeftAttr.viewBehavior = .DragWithPan
+	cell.rightToLeftAttr.viewBehavior = .dragWithPan
 	
 
 	return cell
@@ -36,20 +36,19 @@ override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath:
 It’s **important** that you implement the following delegate method to perform an action when the cell’s state is triggered:
 
 ```swift
-func tableViewCell(cell: PTATableViewCell, didTriggerState state: PTATableViewCellState, withMode mode: PTATableViewCellMode) {
-	if let indexPath = tableView.indexPathForCell(cell) {
-		switch mode {
-		case .Switch:
-			print("row \(indexPath.row)'s switch was triggered")
-			// Do something interesting here.
-		case .Exit:
-			print("row \(indexPath.row)'s exit was triggered")
-			// Do something interesting here.
-			objects.removeAtIndex(indexPath.row)
-			tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-		default:
-			break
-		}
+func tableView(cell: PTATableViewCell, didTrigger state: PTATableViewItemState, with mode: PTATableViewItemMode) {
+	guard let indexPath = tableView.indexPath(for: cell) else { return }
+	switch mode {
+	case .switch:
+		print("row \(indexPath.row)'s switch was triggered")
+		// Do something interesting here.
+	case .exit:
+		print("row \(indexPath.row)'s exit was triggered")
+		// Do something interesting here.
+		objects.remove(at: indexPath.row)
+		tableView.deleteRows(at: [indexPath], with: .fade)
+	default:
+		break
 	}
 }
 ```
@@ -58,16 +57,16 @@ There are also a few _optional_ delegate methods you may implement:
 
 ```swift
 // Asks the delegate whether a given cell should be swiped. Defaults to `true` if not implemented.
-func tableViewCellShouldSwipe(cell: PTATableViewCell) -> Bool
+func tableViewShouldSwipe(cell: PTATableViewCell) -> Bool
 
 // Tells the delegate that the specified cell is being swiped with a percentage.
-func tableViewCellIsSwiping(cell: PTATableViewCell, withPercentage percentage: Double)
+func tableViewIsSwiping(cell: PTATableViewCell, with percentage: Double)
 
 // Tells the delegate that the specified cell started swiping.
-func tableViewCellDidStartSwiping(cell: PTATableViewCell)
+func tableViewDidStartSwiping(cell: PTATableViewCell)
 
 // Tells the delegate that the specified cell ended swiping.
-func tableViewCellDidEndSwiping(cell: PTATableViewCell)
+func tableViewDidEndSwiping(cell: PTATableViewCell)
 ```
 
 See the ActionTest demo project included in this repository for a working example of the project, including the code above.
@@ -75,7 +74,7 @@ See the ActionTest demo project included in this repository for a working exampl
 
 ## Requirements
 
-Since PTATableViewCell is written in Swift 2, it requires Xcode 7 or above and works on iOS 7 and above.
+Since PTATableViewCell is written in Swift 3, it requires Xcode 8 or above and works on iOS 8 and above.
 
 
 ## License
