@@ -67,13 +67,13 @@ public struct PTATableViewItemState: OptionSet {
 	public static func fromMask(_ raw: UInt) -> PTATableViewItemState { return self.init(raw) }
 	
 	/** No state has been triggered. */
-	public static var none: PTATableViewItemState			{ return self.init(0) }
+	public static var none: PTATableViewItemState { return self.init(0) }
 	
 	/** The state triggered during a left-to-right swipe. */
-	public static var leftToRight: PTATableViewItemState	{ return self.init(1 << 0) }
+	public static var leftToRight: PTATableViewItemState	 { return self.init(1 << 0) }
 	
 	/** The state triggered during a right-to-left swipe. */
-	public static var rightToLeft: PTATableViewItemState	{ return self.init(1 << 1) }
+	public static var rightToLeft: PTATableViewItemState	 { return self.init(1 << 1) }
 }
 
 public func == (left: PTATableViewItemState, right: PTATableViewItemState) -> Bool { return left.value == right.value }

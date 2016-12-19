@@ -47,6 +47,10 @@ open class PTATableViewCell: UITableViewCell {
 	
 	fileprivate var stateOptions: PTATableViewItemState = .none
 	
+	fileprivate var previousState: PTATableViewItemState = .none
+	fileprivate var feedbackGenerator: AnyObject?
+	fileprivate var impactGenerator: AnyObject?
+	
 	
 	/** The color that’s revealed before an action is triggered. Defaults to a light gray color. */
 	open var defaultColor = UIColor(red: 227.0/255.0, green: 227.0/255.0, blue: 227.0/255.0, alpha: 1.0)
@@ -362,6 +366,43 @@ private extension PTATableViewCell {
 
 extension PTATableViewCell {
 	
+	fileprivate func hapticFeedbackSetup() {
+		if #available(iOS 10.0, *) {
+			let feedbackGenerator = UISelectionFeedbackGenerator()
+			feedbackGenerator.prepare()
+			self.feedbackGenerator = feedbackGenerator
+			self.impactGenerator = UIImpactFeedbackGenerator(style: .light)
+		}
+	}
+	
+	fileprivate func hapticFeedbackSelectionChanged() {
+		if #available(iOS 10.0, *) {
+			if let feedbackGenerator = self.feedbackGenerator as? UISelectionFeedbackGenerator {
+				feedbackGenerator.selectionChanged()
+				feedbackGenerator.prepare()
+			}
+		}
+	}
+	
+	fileprivate func hapticFeedbackImpactOccurred() {
+		if #available(iOS 10.0, *) {
+			if let feedbackGenerator = self.impactGenerator as? UIImpactFeedbackGenerator {
+				feedbackGenerator.impactOccurred()
+			}
+		}
+	}
+	
+	fileprivate func hapticFeedbackFinalize() {
+		if #available(iOS 10.0, *) {
+			self.feedbackGenerator = nil
+			self.impactGenerator = nil
+		}
+	}
+	
+}
+
+extension PTATableViewCell {
+	
 	open override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
 		if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
 			let point = panGestureRecognizer.velocity(in: self)
@@ -375,6 +416,8 @@ extension PTATableViewCell {
 					return false
 				}
 				
+				previousState = .none
+				hapticFeedbackSetup()
 				delegate?.tableViewDidStartSwiping?(cell: self)
 				return true
 			} else {
@@ -399,6 +442,7 @@ extension PTATableViewCell {
 		let actualTranslation = actualizeTranslation(translation)
 		let percentage = PTATableViewItemHelper.percentageWith(offset: Double(actualTranslation.x), relativeToWidth: Double(bounds.width))
 		direction = PTATableViewItemHelper.directionWith(percentage: percentage)
+		let cellState = stateWith(percentage: percentage)
 		
 		if (gestureState == .began) || (gestureState == .changed) {
 			setupSwipingView()
@@ -412,9 +456,12 @@ extension PTATableViewCell {
 			}
 			slideViewWith(percentage: percentage)
 			
+			if cellState != previousState {
+				previousState = cellState
+				hapticFeedbackSelectionChanged()
+			}
 			delegate?.tableViewIsSwiping?(cell: self, with: percentage)
 		} else if (gestureState == .ended) || (gestureState == .cancelled) {
-			let cellState = stateWith(percentage: percentage)
 			var cellMode: PTATableViewItemMode = .none
 			
 			if (cellState == .leftToRight) && (leftToRightAttr.mode != .none) {
@@ -429,6 +476,10 @@ extension PTATableViewCell {
 				swipeToOriginWith(percentage: percentage)
 			}
 			
+			if cellState != .none {
+				hapticFeedbackImpactOccurred()
+			}
+			hapticFeedbackFinalize()
 			delegate?.tableViewDidEndSwiping?(cell: self)
 		}
 	}
