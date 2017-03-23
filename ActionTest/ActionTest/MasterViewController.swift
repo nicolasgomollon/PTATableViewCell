@@ -69,10 +69,10 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		} else {
 			let redColor = UIColor(red: 232.0/255.0, green: 61.0/255.0, blue: 14.0/255.0, alpha: 1.0)
 			
-			cell.setPanGesture(.leftToRight, mode: .switch, color: view.tintColor, view: viewWithImage(named: "check"))
+			cell.setPanGesture(.leftToRight, mode: .switch, trigger: PTATableViewItemTrigger(kind: .offset, value: 64.0), color: view.tintColor, view: viewWithImage(named: "check"))
 			cell.setPanGesture(.rightToLeft, mode: .exit, color: redColor, view: viewWithImage(named: "cross"))
 			
-			cell.rightToLeftAttr.triggerPercentage = 0.4
+			cell.rightToLeftAttr.trigger.value = 0.4
 			cell.rightToLeftAttr.rubberbandBounce = false
 			cell.rightToLeftAttr.viewBehavior = .dragWithPan
 		}
@@ -108,9 +108,9 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		print("row \(indexPath.row) started swiping")
 	}
 	
-	func tableViewIsSwiping(cell: PTATableViewCell, with percentage: Double) {
+	func tableViewIsSwiping(cell: PTATableViewCell, with offset: CGFloat, percentage: Double) {
 		guard let indexPath = tableView.indexPath(for: cell) else { return }
-		print("row \(indexPath.row) is being swiped with percentage: \(percentage * 100.0)")
+		print("row \(indexPath.row) is being swiped with offset \(offset) (\(percentage * 100.0)%)")
 	}
 	
 	func tableViewDidEndSwiping(cell: PTATableViewCell) {

@@ -79,14 +79,77 @@ public struct PTATableViewItemState: OptionSet {
 public func == (left: PTATableViewItemState, right: PTATableViewItemState) -> Bool { return left.value == right.value }
 
 
+/** Describes the trigger required to perform the action. */
+public class PTATableViewItemTrigger {
+	
+	/** Describes what the value represents. */
+	public enum Kind {
+		
+		/** The value represents a percentage of the width of the item to be panned before the action is triggered. */
+		case percentage
+		
+		/** The value represents the number of points to be panned before the action is triggered. */
+		case offset
+	}
+	
+	/** The kind of number that `value` represents. */
+	public var kind: Kind
+	
+	/** The value of the trigger `kind`. */
+	public var value: Double
+	
+	init(kind: Kind, value: Double) {
+		self.kind = kind
+		self.value = value
+	}
+	
+	/** Calculate the offset relative to the given width, if needed. */
+	public func offset(relativeToWidth w: CGFloat) -> CGFloat {
+		if kind == .offset {
+			return CGFloat(value)
+		}
+		
+		let width = Double(w)
+		var offset = value * width
+		
+		if offset < -width {
+			offset = -width
+		} else if offset > width {
+			offset = width
+		}
+		
+		return CGFloat(offset)
+	}
+	
+	/** Calculate the percentage relative to the given width, if needed. */
+	public func percentage(relativeToWidth w: CGFloat) -> Double {
+		if kind == .percentage {
+			return value
+		}
+		
+		let width = Double(w)
+		var percentage = value / width
+		
+		if percentage < -1.0 {
+			percentage = -1.0
+		} else if percentage > 1.0 {
+			percentage = 1.0
+		}
+		
+		return percentage
+	}
+	
+}
+
+
 /** The attributes used when swiping the item in a specific state. */
 open class PTATableViewItemStateAttributes {
 	
 	/** The mode to use with the item state. Defaults to `.None`. */
 	open var mode: PTATableViewItemMode
 	
-	/** The percent of the width of the item required to be panned before the action is triggered. Defaults to 20%. */
-	open var triggerPercentage: Double
+	/** The trigger required to perform the action. Defaults to 20%. */
+	open var trigger: PTATableViewItemTrigger
 	
 	/** The rubberband effect applied the farther the item is dragged. Defaults to `true`. */
 	open var rubberbandBounce: Bool
@@ -101,12 +164,16 @@ open class PTATableViewItemStateAttributes {
 	open var viewBehavior: PTATableViewItemSlidingViewBehavior
 	
 	public convenience init() {
-		self.init(mode: .none, color: nil, view: nil)
+		self.init(mode: .none, trigger: nil, color: nil, view: nil)
 	}
 	
-	public init(mode: PTATableViewItemMode, color: UIColor?, view: UIView?) {
+	public init(mode: PTATableViewItemMode, trigger: PTATableViewItemTrigger?, color: UIColor?, view: UIView?) {
 		self.mode = mode
-		triggerPercentage = 0.2
+		if let trigger = trigger {
+			self.trigger = trigger
+		} else {
+			self.trigger = PTATableViewItemTrigger(kind: .percentage, value: 0.2)
+		}
 		rubberbandBounce = true
 		self.color = color
 		self.view = view

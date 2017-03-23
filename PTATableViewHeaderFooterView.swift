@@ -16,8 +16,8 @@ public protocol ObjC_PTATableViewHeaderFooterViewDelegate: NSObjectProtocol {
 	/** Asks the delegate whether a given header/footer view should be swiped. Defaults to `true` if not implemented. */
 	@objc optional func tableViewShouldSwipe(headerFooterView: PTATableViewHeaderFooterView) -> Bool
 	
-	/** Tells the delegate that the specified header/footer view is being swiped with a percentage. */
-	@objc optional func tableViewIsSwiping(headerFooterView: PTATableViewHeaderFooterView, with percentage: Double)
+	/** Tells the delegate that the specified header/footer view is being swiped with the offset and percentage. */
+	@objc optional func tableViewIsSwiping(headerFooterView: PTATableViewHeaderFooterView, with offset: CGFloat, percentage: Double)
 	
 	/** Tells the delegate that the specified header/footer view started swiping. */
 	@objc optional func tableViewDidStartSwiping(headerFooterView: PTATableViewHeaderFooterView)
@@ -193,28 +193,97 @@ private extension PTATableViewHeaderFooterView {
 	}
 	
 	func alphaWith(percentage: Double) -> CGFloat {
-		if (percentage > 0.0) && (percentage < leftToRightAttr.triggerPercentage) {
-			return CGFloat(percentage / leftToRightAttr.triggerPercentage)
-		} else if (percentage < 0.0) && (percentage > -rightToLeftAttr.triggerPercentage) {
-			return CGFloat(abs(percentage / rightToLeftAttr.triggerPercentage))
+		let ltrTrigger = leftToRightAttr.trigger
+		let rtlTrigger = rightToLeftAttr.trigger
+		let offset = PTATableViewItemHelper.offsetWith(percentage: abs(percentage), relativeToWidth: bounds.width)
+		if percentage > 0.0 {
+			switch ltrTrigger.kind {
+			case .percentage:
+				if percentage < ltrTrigger.value {
+					return CGFloat(percentage / ltrTrigger.value)
+				}
+			case .offset:
+				let triggerValue = CGFloat(ltrTrigger.value)
+				if offset < triggerValue {
+					return offset / triggerValue
+				}
+			}
+		} else if percentage < 0.0 {
+			switch rtlTrigger.kind {
+			case .percentage:
+				if percentage > -rtlTrigger.value {
+					return CGFloat(abs(percentage / rtlTrigger.value))
+				}
+			case .offset:
+				let triggerValue = CGFloat(rtlTrigger.value)
+				if offset < triggerValue {
+					return offset / triggerValue
+				}
+			}
 		}
 		return 1.0
 	}
 	
 	func colorWith(percentage: Double) -> UIColor {
-		if (percentage >= leftToRightAttr.triggerPercentage) && (leftToRightAttr.mode != .none) && (leftToRightAttr.color != nil) {
-			return leftToRightAttr.color!
-		} else if (percentage <= -rightToLeftAttr.triggerPercentage) && (rightToLeftAttr.mode != .none) && (rightToLeftAttr.color != nil) {
-			return rightToLeftAttr.color!
+		let ltrTrigger = leftToRightAttr.trigger
+		let rtlTrigger = rightToLeftAttr.trigger
+		let offset = PTATableViewItemHelper.offsetWith(percentage: abs(percentage), relativeToWidth: bounds.width)
+		if (percentage > 0.0) && (leftToRightAttr.mode != .none) && (leftToRightAttr.color != nil) {
+			switch ltrTrigger.kind {
+			case .percentage:
+				if percentage >= ltrTrigger.value {
+					return leftToRightAttr.color!
+				}
+			case .offset:
+				let triggerValue = CGFloat(ltrTrigger.value)
+				if offset >= triggerValue {
+					return leftToRightAttr.color!
+				}
+			}
+		} else if (percentage < 0.0) && (rightToLeftAttr.mode != .none) && (rightToLeftAttr.color != nil) {
+			switch rtlTrigger.kind {
+			case .percentage:
+				if percentage <= -rtlTrigger.value {
+					return rightToLeftAttr.color!
+				}
+			case .offset:
+				let triggerValue = CGFloat(rtlTrigger.value)
+				if offset >= triggerValue {
+					return rightToLeftAttr.color!
+				}
+			}
 		}
 		return defaultColor
 	}
 	
 	func stateWith(percentage: Double) -> PTATableViewItemState {
-		if (percentage >= leftToRightAttr.triggerPercentage) && (leftToRightAttr.mode != .none) {
-			return .leftToRight
-		} else if (percentage <= -rightToLeftAttr.triggerPercentage) && (rightToLeftAttr.mode != .none) {
-			return .rightToLeft
+		let ltrTrigger = leftToRightAttr.trigger
+		let rtlTrigger = rightToLeftAttr.trigger
+		let offset = PTATableViewItemHelper.offsetWith(percentage: abs(percentage), relativeToWidth: bounds.width)
+		if (percentage > 0.0) && (leftToRightAttr.mode != .none) {
+			switch ltrTrigger.kind {
+			case .percentage:
+				if percentage >= ltrTrigger.value {
+					return .leftToRight
+				}
+			case .offset:
+				let triggerValue = CGFloat(ltrTrigger.value)
+				if offset >= triggerValue {
+					return .leftToRight
+				}
+			}
+		} else if (percentage < 0.0) && (rightToLeftAttr.mode != .none) {
+			switch rtlTrigger.kind {
+			case .percentage:
+				if percentage <= -rtlTrigger.value {
+					return .rightToLeft
+				}
+			case .offset:
+				let triggerValue = CGFloat(rtlTrigger.value)
+				if offset >= triggerValue {
+					return .rightToLeft
+				}
+			}
 		}
 		return .none
 	}
@@ -244,53 +313,55 @@ private extension PTATableViewHeaderFooterView {
 		position.y = bounds.height / 2.0
 		
 		let width = bounds.width
-		let halfLeftToRightTriggerPercentage = leftToRightAttr.triggerPercentage / 2.0
-		let halfRightToLeftTriggerPercentage = rightToLeftAttr.triggerPercentage / 2.0
+		let offset = PTATableViewItemHelper.offsetWith(percentage: percentage, relativeToWidth: width)
+		
+		let ltrTriggerPercentage = leftToRightAttr.trigger.percentage(relativeToWidth: width)
+		let rtlTriggerPercentage = rightToLeftAttr.trigger.percentage(relativeToWidth: width)
 		
 		switch dragBehavior {
 			
 		case .stickThenDragWithPan:
 			if direction == .leftToRight {
-				if (percentage >= 0.0) && (percentage < leftToRightAttr.triggerPercentage) {
-					position.x = PTATableViewItemHelper.offsetWith(percentage: halfLeftToRightTriggerPercentage, relativeToWidth: width)
-				} else if percentage >= leftToRightAttr.triggerPercentage {
-					position.x = PTATableViewItemHelper.offsetWith(percentage: percentage - halfLeftToRightTriggerPercentage, relativeToWidth: width)
+				if (percentage >= 0.0) && (percentage < ltrTriggerPercentage) {
+					position.x = leftToRightAttr.trigger.offset(relativeToWidth: width) / 2.0
+				} else if percentage >= ltrTriggerPercentage {
+					position.x = offset - (leftToRightAttr.trigger.offset(relativeToWidth: width) / 2.0)
 				}
 			} else if direction == .rightToLeft {
-				if (percentage <= 0.0) && (percentage >= -rightToLeftAttr.triggerPercentage) {
-					position.x = width - PTATableViewItemHelper.offsetWith(percentage: halfRightToLeftTriggerPercentage, relativeToWidth: width)
-				} else if percentage <= -rightToLeftAttr.triggerPercentage {
-					position.x = width + PTATableViewItemHelper.offsetWith(percentage: percentage + halfRightToLeftTriggerPercentage, relativeToWidth: width)
+				if (percentage <= 0.0) && (percentage >= -rtlTriggerPercentage) {
+					position.x = width - (rightToLeftAttr.trigger.offset(relativeToWidth: width) / 2.0)
+				} else if percentage <= -rtlTriggerPercentage {
+					position.x = width + offset + (rightToLeftAttr.trigger.offset(relativeToWidth: width) / 2.0)
 				}
 			}
 			
 		case .dragWithPanThenStick:
 			if direction == .leftToRight {
-				if (percentage >= 0.0) && (percentage < leftToRightAttr.triggerPercentage) {
-					position.x = PTATableViewItemHelper.offsetWith(percentage: percentage - halfLeftToRightTriggerPercentage, relativeToWidth: width)
-				} else if percentage >= leftToRightAttr.triggerPercentage {
-					position.x = PTATableViewItemHelper.offsetWith(percentage: halfLeftToRightTriggerPercentage, relativeToWidth: width)
+				if (percentage >= 0.0) && (percentage < ltrTriggerPercentage) {
+					position.x = offset - (leftToRightAttr.trigger.offset(relativeToWidth: width) / 2.0)
+				} else if percentage >= ltrTriggerPercentage {
+					position.x = leftToRightAttr.trigger.offset(relativeToWidth: width) / 2.0
 				}
 			} else if direction == .rightToLeft {
-				if (percentage <= 0.0) && (percentage >= -rightToLeftAttr.triggerPercentage) {
-					position.x = width + PTATableViewItemHelper.offsetWith(percentage: percentage + halfRightToLeftTriggerPercentage, relativeToWidth: width)
-				} else if percentage <= -rightToLeftAttr.triggerPercentage {
-					position.x = width - PTATableViewItemHelper.offsetWith(percentage: halfRightToLeftTriggerPercentage, relativeToWidth: width)
+				if (percentage <= 0.0) && (percentage >= -rtlTriggerPercentage) {
+					position.x = width + offset + (rightToLeftAttr.trigger.offset(relativeToWidth: width) / 2.0)
+				} else if percentage <= -rtlTriggerPercentage {
+					position.x = width - (rightToLeftAttr.trigger.offset(relativeToWidth: width) / 2.0)
 				}
 			}
 			
 		case .dragWithPan:
 			if direction == .leftToRight {
-				position.x = PTATableViewItemHelper.offsetWith(percentage: percentage - halfLeftToRightTriggerPercentage, relativeToWidth: width)
+				position.x = offset - (leftToRightAttr.trigger.offset(relativeToWidth: width) / 2.0)
 			} else if direction == .rightToLeft {
-				position.x = width + PTATableViewItemHelper.offsetWith(percentage: percentage + halfRightToLeftTriggerPercentage, relativeToWidth: width)
+				position.x = width + offset + (rightToLeftAttr.trigger.offset(relativeToWidth: width) / 2.0)
 			}
 			
 		case .none:
 			if direction == .leftToRight {
-				position.x = PTATableViewItemHelper.offsetWith(percentage: halfLeftToRightTriggerPercentage, relativeToWidth: width)
+				position.x = leftToRightAttr.trigger.offset(relativeToWidth: width) / 2.0
 			} else if direction == .rightToLeft {
-				position.x = width - PTATableViewItemHelper.offsetWith(percentage: halfRightToLeftTriggerPercentage, relativeToWidth: width)
+				position.x = width - (rightToLeftAttr.trigger.offset(relativeToWidth: width) / 2.0)
 			}
 			
 		}
@@ -418,7 +489,7 @@ extension PTATableViewHeaderFooterView: UIGestureRecognizerDelegate {
 			}
 			slideViewWith(percentage: percentage)
 			
-			delegate?.tableViewIsSwiping?(headerFooterView: self, with: percentage)
+			delegate?.tableViewIsSwiping?(headerFooterView: self, with: actualTranslation.x, percentage: percentage)
 		} else if (gestureState == .ended) || (gestureState == .cancelled) {
 			let cellState = stateWith(percentage: percentage)
 			var cellMode: PTATableViewItemMode = .none
@@ -462,11 +533,11 @@ extension PTATableViewHeaderFooterView: UIGestureRecognizerDelegate {
 public extension PTATableViewHeaderFooterView {
 	
 	/** Sets a pan gesture for the specified state and mode. Don’t forget to implement the delegate method `tableViewHeaderFooterView(view:didTriggerState:withMode:)` to perform an action when the header/footer view’s state is triggered. */
-	public func setPanGesture(_ state: PTATableViewItemState, mode: PTATableViewItemMode, color: UIColor?, view: UIView?) {
+	public func setPanGesture(_ state: PTATableViewItemState, mode: PTATableViewItemMode, trigger: PTATableViewItemTrigger? = nil, color: UIColor?, view: UIView?) {
 		stateOptions.insert(state)
 		
 		if state.contains(.leftToRight) {
-			leftToRightAttr = PTATableViewItemStateAttributes(mode: mode, color: color, view: view)
+			leftToRightAttr = PTATableViewItemStateAttributes(mode: mode, trigger: trigger, color: color, view: view)
 			
 			if mode == .none {
 				stateOptions.remove(.leftToRight)
@@ -474,7 +545,7 @@ public extension PTATableViewHeaderFooterView {
 		}
 		
 		if state.contains(.rightToLeft) {
-			rightToLeftAttr = PTATableViewItemStateAttributes(mode: mode, color: color, view: view)
+			rightToLeftAttr = PTATableViewItemStateAttributes(mode: mode, trigger: trigger, color: color, view: view)
 			
 			if mode == .none {
 				stateOptions.remove(.rightToLeft)

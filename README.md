@@ -15,20 +15,20 @@ override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexP
 	
 	cell.textLabel.text = objects[indexPath.row]
 	
-
+	
 	cell.delegate = self
-
-	cell.setPanGesture(.leftToRight, mode: .switch, color: view.tintColor, view: viewWithImage(named: "check"))
+	
+	cell.setPanGesture(.leftToRight, mode: .switch, trigger: PTATableViewItemTrigger(kind: .offset, value: 64.0), color: view.tintColor, view: viewWithImage(named: "check"))
 	cell.leftToRightAttr.viewBehavior = .dragWithPanThenStick
 	
 	let redColor = UIColor(red: 232.0/255.0, green: 61.0/255.0, blue: 14.0/255.0, alpha: 1.0)
 	cell.setPanGesture(.rightToLeft, mode: .exit, color: redColor, view: viewWithImage(named: "cross"))
 	
-	cell.rightToLeftAttr.triggerPercentage = 0.4
+	cell.rightToLeftAttr.trigger.value = 0.4
 	cell.rightToLeftAttr.rubberbandBounce = false
 	cell.rightToLeftAttr.viewBehavior = .dragWithPan
 	
-
+	
 	return cell
 }
 ```
@@ -59,8 +59,8 @@ There are also a few _optional_ delegate methods you may implement:
 // Asks the delegate whether a given cell should be swiped. Defaults to `true` if not implemented.
 func tableViewShouldSwipe(cell: PTATableViewCell) -> Bool
 
-// Tells the delegate that the specified cell is being swiped with a percentage.
-func tableViewIsSwiping(cell: PTATableViewCell, with percentage: Double)
+// Tells the delegate that the specified cell is being swiped with the offset and percentage.
+func tableViewIsSwiping(cell: PTATableViewCell, with offset: CGFloat, percentage: Double)
 
 // Tells the delegate that the specified cell started swiping.
 func tableViewDidStartSwiping(cell: PTATableViewCell)
