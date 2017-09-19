@@ -461,7 +461,7 @@ extension PTATableViewHeaderFooterView: UIGestureRecognizerDelegate {
 		return true
 	}
 	
-	internal func _pan(_ gesture: UIPanGestureRecognizer) {
+	@objc internal func _pan(_ gesture: UIPanGestureRecognizer) {
 		if let shouldSwipe = delegate?.tableViewShouldSwipe?(headerFooterView: self) {
 			if !shouldSwipe { return }
 		}

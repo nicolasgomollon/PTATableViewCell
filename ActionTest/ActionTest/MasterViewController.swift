@@ -30,7 +30,7 @@ class MasterViewController: UITableViewController, PTATableViewCellDelegate {
 		// Dispose of any resources that can be recreated.
 	}
 	
-	func insertNewObject(_ sender: AnyObject) {
+	@objc func insertNewObject(_ sender: AnyObject) {
 		objects += ["Swipe Me Left to Delete"]
 		let indexPath = IndexPath(row: (objects.count - 1), section: 0)
 		tableView.insertRows(at: [indexPath], with: .automatic)

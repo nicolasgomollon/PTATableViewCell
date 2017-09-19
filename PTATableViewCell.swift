@@ -502,7 +502,7 @@ extension PTATableViewCell {
 		_pan(panGestureRecognizer)
 	}
 	
-	internal func _pan(_ gesture: UIPanGestureRecognizer) {
+	@objc internal func _pan(_ gesture: UIPanGestureRecognizer) {
 		if let shouldSwipe = delegate?.tableViewShouldSwipe?(cell: self) {
 			if !shouldSwipe { return }
 		}
