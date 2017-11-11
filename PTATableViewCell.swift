@@ -437,7 +437,7 @@ private extension PTATableViewCell {
 
 extension PTATableViewCell {
 	
-	fileprivate func hapticFeedbackSetup() {
+	func hapticFeedbackSetup() {
 		if #available(iOS 10.0, *) {
 			let feedbackGenerator = UISelectionFeedbackGenerator()
 			feedbackGenerator.prepare()
@@ -446,7 +446,7 @@ extension PTATableViewCell {
 		}
 	}
 	
-	fileprivate func hapticFeedbackSelectionChanged() {
+	func hapticFeedbackSelectionChanged() {
 		if #available(iOS 10.0, *) {
 			if let feedbackGenerator = self.feedbackGenerator as? UISelectionFeedbackGenerator {
 				feedbackGenerator.selectionChanged()
@@ -455,7 +455,7 @@ extension PTATableViewCell {
 		}
 	}
 	
-	fileprivate func hapticFeedbackImpactOccurred() {
+	func hapticFeedbackImpactOccurred() {
 		if #available(iOS 10.0, *) {
 			if let feedbackGenerator = self.impactGenerator as? UIImpactFeedbackGenerator {
 				feedbackGenerator.impactOccurred()
@@ -463,7 +463,7 @@ extension PTATableViewCell {
 		}
 	}
 	
-	fileprivate func hapticFeedbackFinalize() {
+	func hapticFeedbackFinalize() {
 		if #available(iOS 10.0, *) {
 			self.feedbackGenerator = nil
 			self.impactGenerator = nil
