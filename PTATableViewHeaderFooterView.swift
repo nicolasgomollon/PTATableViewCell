@@ -468,11 +468,11 @@ extension PTATableViewHeaderFooterView: UIGestureRecognizerDelegate {
 		pan(gestureState: gesture.state, translation: gesture.translation(in: self), velocity: gesture.velocity(in: self))
 	}
 	
-	public func pan(gestureState: UIGestureRecognizerState, translation: CGPoint) {
+	public func pan(gestureState: UIGestureRecognizer.State, translation: CGPoint) {
 		pan(gestureState: gestureState, translation: translation, velocity: CGPoint.zero)
 	}
 	
-	public func pan(gestureState: UIGestureRecognizerState, translation: CGPoint, velocity: CGPoint) {
+	public func pan(gestureState: UIGestureRecognizer.State, translation: CGPoint, velocity: CGPoint) {
 		let actualTranslation = actualizeTranslation(translation)
 		let percentage = PTATableViewItemHelper.percentageWith(offset: Double(actualTranslation.x), relativeToWidth: Double(bounds.width))
 		direction = PTATableViewItemHelper.directionWith(percentage: percentage)
