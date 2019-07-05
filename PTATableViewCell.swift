@@ -579,7 +579,7 @@ extension PTATableViewCell {
 	
 }
 
-public extension PTATableViewCell {
+extension PTATableViewCell {
 	
 	/** Sets a pan gesture for the specified state and mode. Don’t forget to implement the delegate method `tableViewCell(cell:didTriggerState:withMode:)` to perform an action when the cell’s state is triggered. */
 	public func setPanGesture(_ state: PTATableViewItemState, mode: PTATableViewItemMode, trigger: PTATableViewItemTrigger? = nil, color: UIColor?, view: UIView?) {

@@ -530,7 +530,7 @@ extension PTATableViewHeaderFooterView: UIGestureRecognizerDelegate {
 	
 }
 
-public extension PTATableViewHeaderFooterView {
+extension PTATableViewHeaderFooterView {
 	
 	/** Sets a pan gesture for the specified state and mode. Don’t forget to implement the delegate method `tableViewHeaderFooterView(view:didTriggerState:withMode:)` to perform an action when the header/footer view’s state is triggered. */
 	public func setPanGesture(_ state: PTATableViewItemState, mode: PTATableViewItemMode, trigger: PTATableViewItemTrigger? = nil, color: UIColor?, view: UIView?) {
