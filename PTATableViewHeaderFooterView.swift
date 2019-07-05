@@ -51,25 +51,23 @@ open class PTATableViewHeaderFooterView: UITableViewHeaderFooterView {
 	
 	
 	/** The color that’s revealed before an action is triggered. Defaults to a light gray color. */
-	open var defaultColor = UIColor(red: 227.0/255.0, green: 227.0/255.0, blue: 227.0/255.0, alpha: 1.0)
+	open var defaultColor: UIColor = UIColor(red: 227.0/255.0, green: 227.0/255.0, blue: 227.0/255.0, alpha: 1.0)
 	
 	/** The attributes used when swiping the header/footer view from left to right. */
-	open var leftToRightAttr = PTATableViewItemStateAttributes()
+	open var leftToRightAttr: PTATableViewItemStateAttributes = .init()
 	
 	/** The attributes used when swiping the header/footer view from right to left. */
-	open var rightToLeftAttr = PTATableViewItemStateAttributes()
+	open var rightToLeftAttr: PTATableViewItemStateAttributes = .init()
 	
 	
 	fileprivate var _slidingView: UIView?
 	fileprivate var slidingView: UIView! {
 		get {
-			if let slidingView = _slidingView {
+			if let slidingView: UIView = _slidingView {
 				return slidingView
 			}
-			
 			_slidingView = UIView()
 			_slidingView!.contentMode = .center
-			
 			return _slidingView
 		}
 		set {
@@ -80,14 +78,12 @@ open class PTATableViewHeaderFooterView: UITableViewHeaderFooterView {
 	fileprivate var _colorIndicatorView: UIView?
 	fileprivate var colorIndicatorView: UIView! {
 		get {
-			if let colorIndicatorView = _colorIndicatorView {
+			if let colorIndicatorView: UIView = _colorIndicatorView {
 				return colorIndicatorView
 			}
-			
 			_colorIndicatorView = UIView(frame: bounds)
 			_colorIndicatorView!.autoresizingMask = [.flexibleHeight, .flexibleWidth]
 			_colorIndicatorView!.backgroundColor = defaultColor
-			
 			return _colorIndicatorView
 		}
 		set {
@@ -114,9 +110,8 @@ open class PTATableViewHeaderFooterView: UITableViewHeaderFooterView {
 	}
 	
 	fileprivate func initialize() {
-		if initialized { return }
+		guard !initialized else { return }
 		initialized = true
-		
 		contentView.backgroundColor = .white
 		panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(PTATableViewHeaderFooterView._pan(_:)))
 		panGestureRecognizer.delegate = self
@@ -125,7 +120,6 @@ open class PTATableViewHeaderFooterView: UITableViewHeaderFooterView {
 	
 	open override func prepareForReuse() {
 		super.prepareForReuse()
-		
 		removeSwipingView()
 		stateOptions = .none
 		leftToRightAttr = PTATableViewItemStateAttributes()
@@ -137,18 +131,16 @@ open class PTATableViewHeaderFooterView: UITableViewHeaderFooterView {
 private extension PTATableViewHeaderFooterView {
 	
 	func setupSwipingView() {
-		if _colorIndicatorView != nil { return }
+		guard _colorIndicatorView == nil else { return }
 		colorIndicatorView.addSubview(slidingView)
 		// TODO: Check this out on iOS 7.
 		insertSubview(colorIndicatorView, belowSubview: contentView)
 	}
 	
 	func removeSwipingView() {
-		if _colorIndicatorView == nil { return }
-		
+		guard _colorIndicatorView != nil else { return }
 		slidingView?.removeFromSuperview()
 		slidingView = nil
-		
 		colorIndicatorView?.removeFromSuperview()
 		colorIndicatorView = nil
 	}
@@ -158,12 +150,12 @@ private extension PTATableViewHeaderFooterView {
 private extension PTATableViewHeaderFooterView {
 	
 	func animationDurationWith(velocity: CGPoint) -> TimeInterval {
-		let DurationHighLimit = 0.1
-		let DurationLowLimit = 0.25
+		let DurationHighLimit: Double = 0.1
+		let DurationLowLimit: Double = 0.25
 		
-		let width = bounds.width
-		let animationDurationDiff = DurationHighLimit - DurationLowLimit
-		var horizontalVelocity = velocity.x
+		let width: CGFloat = bounds.width
+		let animationDurationDiff: TimeInterval = DurationHighLimit - DurationLowLimit
+		var horizontalVelocity: CGFloat = velocity.x
 		
 		if horizontalVelocity < -width {
 			horizontalVelocity = -width
@@ -193,9 +185,9 @@ private extension PTATableViewHeaderFooterView {
 	}
 	
 	func alphaWith(percentage: Double) -> CGFloat {
-		let ltrTrigger = leftToRightAttr.trigger
-		let rtlTrigger = rightToLeftAttr.trigger
-		let offset = PTATableViewItemHelper.offsetWith(percentage: abs(percentage), relativeToWidth: bounds.width)
+		let ltrTrigger: PTATableViewItemTrigger = leftToRightAttr.trigger
+		let rtlTrigger: PTATableViewItemTrigger = rightToLeftAttr.trigger
+		let offset: CGFloat = PTATableViewItemHelper.offsetWith(percentage: abs(percentage), relativeToWidth: bounds.width)
 		if percentage > 0.0 {
 			switch ltrTrigger.kind {
 			case .percentage:
@@ -203,7 +195,7 @@ private extension PTATableViewHeaderFooterView {
 					return CGFloat(percentage / ltrTrigger.value)
 				}
 			case .offset:
-				let triggerValue = CGFloat(ltrTrigger.value)
+				let triggerValue: CGFloat = CGFloat(ltrTrigger.value)
 				if offset < triggerValue {
 					return offset / triggerValue
 				}
@@ -215,7 +207,7 @@ private extension PTATableViewHeaderFooterView {
 					return CGFloat(abs(percentage / rtlTrigger.value))
 				}
 			case .offset:
-				let triggerValue = CGFloat(rtlTrigger.value)
+				let triggerValue: CGFloat = CGFloat(rtlTrigger.value)
 				if offset < triggerValue {
 					return offset / triggerValue
 				}
@@ -225,9 +217,9 @@ private extension PTATableViewHeaderFooterView {
 	}
 	
 	func colorWith(percentage: Double) -> UIColor {
-		let ltrTrigger = leftToRightAttr.trigger
-		let rtlTrigger = rightToLeftAttr.trigger
-		let offset = PTATableViewItemHelper.offsetWith(percentage: abs(percentage), relativeToWidth: bounds.width)
+		let ltrTrigger: PTATableViewItemTrigger = leftToRightAttr.trigger
+		let rtlTrigger: PTATableViewItemTrigger = rightToLeftAttr.trigger
+		let offset: CGFloat = PTATableViewItemHelper.offsetWith(percentage: abs(percentage), relativeToWidth: bounds.width)
 		if (percentage > 0.0) && (leftToRightAttr.mode != .none) && (leftToRightAttr.color != nil) {
 			switch ltrTrigger.kind {
 			case .percentage:
@@ -235,7 +227,7 @@ private extension PTATableViewHeaderFooterView {
 					return leftToRightAttr.color!
 				}
 			case .offset:
-				let triggerValue = CGFloat(ltrTrigger.value)
+				let triggerValue: CGFloat = CGFloat(ltrTrigger.value)
 				if offset >= triggerValue {
 					return leftToRightAttr.color!
 				}
@@ -247,7 +239,7 @@ private extension PTATableViewHeaderFooterView {
 					return rightToLeftAttr.color!
 				}
 			case .offset:
-				let triggerValue = CGFloat(rtlTrigger.value)
+				let triggerValue: CGFloat = CGFloat(rtlTrigger.value)
 				if offset >= triggerValue {
 					return rightToLeftAttr.color!
 				}
@@ -257,9 +249,9 @@ private extension PTATableViewHeaderFooterView {
 	}
 	
 	func stateWith(percentage: Double) -> PTATableViewItemState {
-		let ltrTrigger = leftToRightAttr.trigger
-		let rtlTrigger = rightToLeftAttr.trigger
-		let offset = PTATableViewItemHelper.offsetWith(percentage: abs(percentage), relativeToWidth: bounds.width)
+		let ltrTrigger: PTATableViewItemTrigger = leftToRightAttr.trigger
+		let rtlTrigger: PTATableViewItemTrigger = rightToLeftAttr.trigger
+		let offset: CGFloat = PTATableViewItemHelper.offsetWith(percentage: abs(percentage), relativeToWidth: bounds.width)
 		if (percentage > 0.0) && (leftToRightAttr.mode != .none) {
 			switch ltrTrigger.kind {
 			case .percentage:
@@ -267,7 +259,7 @@ private extension PTATableViewHeaderFooterView {
 					return .leftToRight
 				}
 			case .offset:
-				let triggerValue = CGFloat(ltrTrigger.value)
+				let triggerValue: CGFloat = CGFloat(ltrTrigger.value)
 				if offset >= triggerValue {
 					return .leftToRight
 				}
@@ -279,7 +271,7 @@ private extension PTATableViewHeaderFooterView {
 					return .rightToLeft
 				}
 			case .offset:
-				let triggerValue = CGFloat(rtlTrigger.value)
+				let triggerValue: CGFloat = CGFloat(rtlTrigger.value)
 				if offset >= triggerValue {
 					return .rightToLeft
 				}
@@ -293,14 +285,12 @@ private extension PTATableViewHeaderFooterView {
 private extension PTATableViewHeaderFooterView {
 	
 	func animateWith(offset: Double) {
-		let percentage = PTATableViewItemHelper.percentageWith(offset: offset, relativeToWidth: Double(bounds.width))
-		
-		if let view = viewWith(percentage: percentage) {
+		let percentage: Double = PTATableViewItemHelper.percentageWith(offset: offset, relativeToWidth: Double(bounds.width))
+		if let view: UIView = viewWith(percentage: percentage) {
 			addSubviewToSlidingView(view)
 			slidingView.alpha = alphaWith(percentage: percentage)
 			slideViewWith(percentage: percentage)
 		}
-		
 		colorIndicatorView.backgroundColor = colorWith(percentage: percentage)
 	}
 	
@@ -309,14 +299,14 @@ private extension PTATableViewHeaderFooterView {
 	}
 	
 	func slideViewWith(percentage: Double, view: UIView?, andDragBehavior dragBehavior: PTATableViewItemSlidingViewBehavior) {
-		var position = CGPoint.zero
+		var position: CGPoint = .zero
 		position.y = bounds.height / 2.0
 		
-		let width = bounds.width
-		let offset = PTATableViewItemHelper.offsetWith(percentage: percentage, relativeToWidth: width)
+		let width: CGFloat = bounds.width
+		let offset: CGFloat = PTATableViewItemHelper.offsetWith(percentage: percentage, relativeToWidth: width)
 		
-		let ltrTriggerPercentage = leftToRightAttr.trigger.percentage(relativeToWidth: width)
-		let rtlTriggerPercentage = rightToLeftAttr.trigger.percentage(relativeToWidth: width)
+		let ltrTriggerPercentage: Double = leftToRightAttr.trigger.percentage(relativeToWidth: width)
+		let rtlTriggerPercentage: Double = rightToLeftAttr.trigger.percentage(relativeToWidth: width)
 		
 		switch dragBehavior {
 			
@@ -366,13 +356,11 @@ private extension PTATableViewHeaderFooterView {
 			
 		}
 		
-		if let activeView = view {
-			var activeViewFrame = activeView.bounds
-			activeViewFrame.origin.x = position.x - (activeViewFrame.size.width / 2.0)
-			activeViewFrame.origin.y = position.y - (activeViewFrame.size.height / 2.0)
-			
-			slidingView.frame = activeViewFrame
-		}
+		guard let activeView: UIView = view else { return }
+		var activeViewFrame: CGRect = activeView.bounds
+		activeViewFrame.origin.x = position.x - (activeViewFrame.size.width / 2.0)
+		activeViewFrame.origin.y = position.y - (activeViewFrame.size.height / 2.0)
+		slidingView.frame = activeViewFrame
 	}
 	
 	func moveWith(percentage: Double, duration: TimeInterval, direction: PTATableViewItemState) {
@@ -384,45 +372,44 @@ private extension PTATableViewHeaderFooterView {
 			origin += bounds.width
 		}
 		
-		var frame = contentView.frame
+		var frame: CGRect = contentView.frame
 		frame.origin.x = origin
 		
 		colorIndicatorView.backgroundColor = colorWith(percentage: percentage)
 		
-		UIView.animate(withDuration: duration, delay: 0.0, options: [.curveEaseOut, .allowUserInteraction], animations: { [unowned self] () -> Void in
-				self.contentView.frame = frame
-				self.slidingView.alpha = 0.0
-				self.slideViewWith(percentage: PTATableViewItemHelper.percentageWith(offset: Double(origin), relativeToWidth: Double(self.bounds.width)), view: self.viewWith(percentage: percentage), andDragBehavior: self.viewBehaviorWith(percentage: percentage))
-			}, completion: { [unowned self] (Bool) -> Void in
-				self.executeCompletionBlockWith(percentage: percentage)
-			})
+		UIView.animate(withDuration: duration, delay: 0.0, options: [.curveEaseOut, .allowUserInteraction], animations: {
+			self.contentView.frame = frame
+			self.slidingView.alpha = 0.0
+			self.slideViewWith(percentage: PTATableViewItemHelper.percentageWith(offset: Double(origin), relativeToWidth: Double(self.bounds.width)), view: self.viewWith(percentage: percentage), andDragBehavior: self.viewBehaviorWith(percentage: percentage))
+		}, completion: { (finished: Bool) in
+			self.executeCompletionBlockWith(percentage: percentage)
+		})
 	}
 	
 	func swipeToOriginWith(percentage: Double) {
 		executeCompletionBlockWith(percentage: percentage)
 		
-		let offset = PTATableViewItemHelper.offsetWith(percentage: percentage, relativeToWidth: bounds.width)
+		let offset: CGFloat = PTATableViewItemHelper.offsetWith(percentage: percentage, relativeToWidth: bounds.width)
 		
-		UIView.animate(withDuration: 0.3, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: offset / 100.0, options: [.curveEaseOut, .allowUserInteraction], animations: { [unowned self] () -> Void in
-				self.contentView.frame = self.contentView.bounds
-				self.colorIndicatorView.backgroundColor = self.defaultColor
-				self.slidingView.alpha = 0.0
-				if ((self.stateWith(percentage: percentage) == .none) ||
-					((self.direction == .leftToRight) && (self.leftToRightAttr.viewBehavior == .stickThenDragWithPan)) ||
-					((self.direction == .rightToLeft) && (self.rightToLeftAttr.viewBehavior == .stickThenDragWithPan))) {
-						self.slideViewWith(percentage: 0.0, view: self.viewWith(percentage: percentage), andDragBehavior: self.viewBehaviorWith(percentage: percentage))
-				} else {
-					self.slideViewWith(percentage: 0.0, view: self.viewWith(percentage: percentage), andDragBehavior: .none)
-				}
-			}, completion: { [unowned self] (Bool) -> Void in
-				self.removeSwipingView()
-			})
+		UIView.animate(withDuration: 0.3, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: offset / 100.0, options: [.curveEaseOut, .allowUserInteraction], animations: {
+			self.contentView.frame = self.contentView.bounds
+			self.colorIndicatorView.backgroundColor = self.defaultColor
+			self.slidingView.alpha = 0.0
+			if ((self.stateWith(percentage: percentage) == .none) ||
+				((self.direction == .leftToRight) && (self.leftToRightAttr.viewBehavior == .stickThenDragWithPan)) ||
+				((self.direction == .rightToLeft) && (self.rightToLeftAttr.viewBehavior == .stickThenDragWithPan))) {
+				self.slideViewWith(percentage: 0.0, view: self.viewWith(percentage: percentage), andDragBehavior: self.viewBehaviorWith(percentage: percentage))
+			} else {
+				self.slideViewWith(percentage: 0.0, view: self.viewWith(percentage: percentage), andDragBehavior: .none)
+			}
+		}, completion: { (finished: Bool) in
+			self.removeSwipingView()
+		})
 	}
 	
 	func executeCompletionBlockWith(percentage: Double) {
-		let state = stateWith(percentage: percentage)
-		var mode: PTATableViewItemMode = .none
-		
+		let state: PTATableViewItemState = stateWith(percentage: percentage)
+		let mode: PTATableViewItemMode
 		switch state {
 		case PTATableViewItemState.leftToRight:
 			mode = leftToRightAttr.mode
@@ -431,7 +418,6 @@ private extension PTATableViewHeaderFooterView {
 		default:
 			mode = .none
 		}
-		
 		delegate?.tableView(headerFooterView: self, didTrigger: state, with: mode)
 	}
 	
@@ -440,30 +426,25 @@ private extension PTATableViewHeaderFooterView {
 extension PTATableViewHeaderFooterView: UIGestureRecognizerDelegate {
 	
 	open override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-		if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
-			let point = panGestureRecognizer.velocity(in: self)
-			if abs(point.x) > abs(point.y) {
-				
-				if (point.x < 0.0) && !stateOptions.contains(.rightToLeft) {
-					return false
-				}
-				
-				if (point.x > 0.0) && !stateOptions.contains(.leftToRight) {
-					return false
-				}
-				
-				delegate?.tableViewDidStartSwiping?(headerFooterView: self)
-				return true
-			} else {
+		guard let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer else { return true }
+		let point: CGPoint = panGestureRecognizer.velocity(in: self)
+		if abs(point.x) > abs(point.y) {
+			if (point.x < 0.0) && !stateOptions.contains(.rightToLeft) {
 				return false
 			}
+			if (point.x > 0.0) && !stateOptions.contains(.leftToRight) {
+				return false
+			}
+			delegate?.tableViewDidStartSwiping?(headerFooterView: self)
+			return true
+		} else {
+			return false
 		}
-		return true
 	}
 	
 	@objc internal func _pan(_ gesture: UIPanGestureRecognizer) {
-		if let shouldSwipe = delegate?.tableViewShouldSwipe?(headerFooterView: self) {
-			if !shouldSwipe { return }
+		if let shouldSwipe: Bool = delegate?.tableViewShouldSwipe?(headerFooterView: self) {
+			guard shouldSwipe else { return }
 		}
 		pan(gestureState: gesture.state, translation: gesture.translation(in: self), velocity: gesture.velocity(in: self))
 	}
@@ -473,25 +454,30 @@ extension PTATableViewHeaderFooterView: UIGestureRecognizerDelegate {
 	}
 	
 	public func pan(gestureState: UIGestureRecognizer.State, translation: CGPoint, velocity: CGPoint) {
-		let actualTranslation = actualizeTranslation(translation)
-		let percentage = PTATableViewItemHelper.percentageWith(offset: Double(actualTranslation.x), relativeToWidth: Double(bounds.width))
+		let actualTranslation: CGPoint = actualizeTranslation(translation)
+		let percentage: Double = PTATableViewItemHelper.percentageWith(offset: Double(actualTranslation.x), relativeToWidth: Double(bounds.width))
 		direction = PTATableViewItemHelper.directionWith(percentage: percentage)
 		
-		if (gestureState == .began) || (gestureState == .changed) {
+		switch gestureState {
+			
+		case .began,
+			 .changed:
 			setupSwipingView()
 			
 			contentView.frame = contentView.bounds.offsetBy(dx: actualTranslation.x, dy: 0.0)
 			colorIndicatorView.backgroundColor = colorWith(percentage: percentage)
 			slidingView.alpha = alphaWith(percentage: percentage)
 			
-			if let view = viewWith(percentage: percentage) {
+			if let view: UIView = viewWith(percentage: percentage) {
 				addSubviewToSlidingView(view)
 			}
 			slideViewWith(percentage: percentage)
 			
 			delegate?.tableViewIsSwiping?(headerFooterView: self, with: actualTranslation.x, percentage: percentage)
-		} else if (gestureState == .ended) || (gestureState == .cancelled) {
-			let cellState = stateWith(percentage: percentage)
+			
+		case .ended,
+			 .cancelled:
+			let cellState: PTATableViewItemState = stateWith(percentage: percentage)
 			var cellMode: PTATableViewItemMode = .none
 			
 			if (cellState == .leftToRight) && (leftToRightAttr.mode != .none) {
@@ -507,12 +493,15 @@ extension PTATableViewHeaderFooterView: UIGestureRecognizerDelegate {
 			}
 			
 			delegate?.tableViewDidEndSwiping?(headerFooterView: self)
+			
+		default:
+			break
 		}
 	}
 	
 	public func actualizeTranslation(_ translation: CGPoint) -> CGPoint {
-		let width = bounds.width
-		var panOffset = translation.x
+		let width: CGFloat = bounds.width
+		var panOffset: CGFloat = translation.x
 		if ((panOffset > 0.0) && leftToRightAttr.rubberbandBounce ||
 			(panOffset < 0.0) && rightToLeftAttr.rubberbandBounce) {
 				let offset = abs(panOffset)
@@ -535,18 +524,14 @@ extension PTATableViewHeaderFooterView {
 	/** Sets a pan gesture for the specified state and mode. Don’t forget to implement the delegate method `tableViewHeaderFooterView(view:didTriggerState:withMode:)` to perform an action when the header/footer view’s state is triggered. */
 	public func setPanGesture(_ state: PTATableViewItemState, mode: PTATableViewItemMode, trigger: PTATableViewItemTrigger? = nil, color: UIColor?, view: UIView?) {
 		stateOptions.insert(state)
-		
 		if state.contains(.leftToRight) {
 			leftToRightAttr = PTATableViewItemStateAttributes(mode: mode, trigger: trigger, color: color, view: view)
-			
 			if mode == .none {
 				stateOptions.remove(.leftToRight)
 			}
 		}
-		
 		if state.contains(.rightToLeft) {
 			rightToLeftAttr = PTATableViewItemStateAttributes(mode: mode, trigger: trigger, color: color, view: view)
-			
 			if mode == .none {
 				stateOptions.remove(.rightToLeft)
 			}

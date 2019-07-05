@@ -51,16 +51,16 @@ public struct PTATableViewItemState: OptionSet {
 	public init(rawValue: UInt) { self.value = rawValue }
 	
 	// MARK: NilLiteralConvertible
-	public init(nilLiteral: ()) { self.value = 0}
+	public init(nilLiteral: ()) { self.value = 0 }
 	public static func convertFromNilLiteral() -> PTATableViewItemState { return self.init(0) }
 	
 	// MARK: RawRepresentable
-	public var rawValue: UInt { return self.value }
-	public func toRaw() -> UInt { return self.value }
+	public var rawValue: UInt { return value }
+	public func toRaw() -> UInt { return value }
 	public static func fromRaw(_ raw: UInt) -> PTATableViewItemState? { return self.init(raw) }
 	
 	// MARK: BooleanType
-	public var boolValue: Bool { return self.value != 0 }
+	public var boolValue: Bool { return value != 0 }
 	
 	// MARK: BitwiseOperationsType
 	public static var allZeros: PTATableViewItemState { return self.init(0) }
@@ -70,10 +70,10 @@ public struct PTATableViewItemState: OptionSet {
 	public static var none: PTATableViewItemState { return self.init(0) }
 	
 	/** The state triggered during a left-to-right swipe. */
-	public static var leftToRight: PTATableViewItemState	 { return self.init(1 << 0) }
+	public static var leftToRight: PTATableViewItemState { return self.init(1 << 0) }
 	
 	/** The state triggered during a right-to-left swipe. */
-	public static var rightToLeft: PTATableViewItemState	 { return self.init(1 << 1) }
+	public static var rightToLeft: PTATableViewItemState { return self.init(1 << 1) }
 }
 
 public func == (left: PTATableViewItemState, right: PTATableViewItemState) -> Bool { return left.value == right.value }
@@ -105,37 +105,27 @@ public class PTATableViewItemTrigger {
 	
 	/** Calculate the offset relative to the given width, if needed. */
 	public func offset(relativeToWidth w: CGFloat) -> CGFloat {
-		if kind == .offset {
-			return CGFloat(value)
-		}
-		
-		let width = Double(w)
-		var offset = value * width
-		
+		guard kind != .offset else { return CGFloat(value) }
+		let width: Double = Double(w)
+		var offset: Double = value * width
 		if offset < -width {
 			offset = -width
 		} else if offset > width {
 			offset = width
 		}
-		
 		return CGFloat(offset)
 	}
 	
 	/** Calculate the percentage relative to the given width, if needed. */
 	public func percentage(relativeToWidth w: CGFloat) -> Double {
-		if kind == .percentage {
-			return value
-		}
-		
-		let width = Double(w)
-		var percentage = value / width
-		
+		guard kind != .percentage else { return value }
+		let width: Double = Double(w)
+		var percentage: Double = value / width
 		if percentage < -1.0 {
 			percentage = -1.0
 		} else if percentage > 1.0 {
 			percentage = 1.0
 		}
-		
 		return percentage
 	}
 	
@@ -169,15 +159,15 @@ open class PTATableViewItemStateAttributes {
 	
 	public init(mode: PTATableViewItemMode, trigger: PTATableViewItemTrigger?, color: UIColor?, view: UIView?) {
 		self.mode = mode
-		if let trigger = trigger {
+		if let trigger: PTATableViewItemTrigger = trigger {
 			self.trigger = trigger
 		} else {
 			self.trigger = PTATableViewItemTrigger(kind: .percentage, value: 0.2)
 		}
-		rubberbandBounce = true
+		self.rubberbandBounce = true
 		self.color = color
 		self.view = view
-		viewBehavior = .stickThenDragWithPan
+		self.viewBehavior = .stickThenDragWithPan
 	}
 	
 }
@@ -186,27 +176,23 @@ open class PTATableViewItemStateAttributes {
 open class PTATableViewItemHelper: NSObject {
 	
 	open class func offsetWith(percentage: Double, relativeToWidth w: CGFloat) -> CGFloat {
-		let width = Double(w)
-		var offset = percentage * width
-		
+		let width: Double = Double(w)
+		var offset: Double = percentage * width
 		if offset < -width {
 			offset = -width
 		} else if offset > width {
 			offset = width
 		}
-		
 		return CGFloat(offset)
 	}
 	
 	open class func percentageWith(offset: Double, relativeToWidth width: Double) -> Double {
-		var percentage = offset / width
-		
+		var percentage: Double = offset / width
 		if percentage < -1.0 {
 			percentage = -1.0
 		} else if percentage > 1.0 {
 			percentage = 1.0
 		}
-		
 		return percentage
 	}
 	
