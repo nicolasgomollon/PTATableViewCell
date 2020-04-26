@@ -115,6 +115,9 @@ open class PTATableViewCell: UITableViewCell {
 		contentView.backgroundColor = .white
 		panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(PTATableViewCell._pan(_:)))
 		panGestureRecognizer.delegate = self
+		if #available(iOS 13.4, *) {
+			panGestureRecognizer.allowedScrollTypesMask = [.continuous]
+		}
 		addGestureRecognizer(panGestureRecognizer)
 	}
 	
