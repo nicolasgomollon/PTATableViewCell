@@ -521,6 +521,13 @@ extension PTATableViewCell {
 			
 		case .ended,
 			 .cancelled:
+			//
+			// For use only with Xcode UI Testing:
+			// Set launch argument `"-PTATableViewCellUITestingScreenshots", "1"` to disable returning a cell
+			// to its origin, to facilitate taking a screenshot with a triggered cell.
+			//
+			guard !UserDefaults.standard.bool(forKey: "PTATableViewCellUITestingScreenshots") else { break }
+			
 			var cellMode: PTATableViewItemMode = .none
 			
 			if (cellState == .leftToRight) && (leftToRightAttr.mode != .none) {
